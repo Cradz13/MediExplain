@@ -1,0 +1,11 @@
+{
+  "name": "MediExplain",
+  "description": "Medical report simplification, live camera scanner, lab visualizer, and doctor visit planner.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
