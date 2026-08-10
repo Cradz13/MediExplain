@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Header } from './components/Header';
 import { DisclaimerBanner } from './components/DisclaimerBanner';
 import { UploadSection } from './components/UploadSection';
@@ -247,6 +248,9 @@ export default function App() {
           <span>MediExplain &copy; 2026. Educational Medical Report Assistant.</span>
         </div>
       </footer>
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
 
     </div>
   );
