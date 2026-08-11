@@ -23,6 +23,10 @@ import { prepareFileForUpload } from './utils/fileProcessing';
 import { Language, translations } from './utils/i18n';
 
 export default function App() {
+  // Keep the original analysis separate from the localized version on screen.
+  // This means switching from English to French, then Arabic, always translates
+  // from the original report instead of translating an already-translated copy.
+  const [sourceAnalysis, setSourceAnalysis] = useState<ReportAnalysisResult | null>(null);
   const [analysis, setAnalysis] = useState<ReportAnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState<string>('summary');
   const [darkMode, setDarkMode] = useState<boolean>(true);
@@ -37,31 +41,36 @@ export default function App() {
 
   const t = translations[language];
 
-  // Sync Dark mode & Document Language & translate active analysis
+  // Apply the selected language to every page, including browser accessibility
+  // metadata and right-to-left layout. Reports are localized from their source
+  // copy whenever the user changes language.
   useEffect(() => {
     document.documentElement.classList.add('dark');
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('medi_explain_lang', language);
 
-    if (analysis) {
-      if (analysis.fileType === 'sample') {
-        const sampleId = analysis.id.replace('-analysis', '');
-        const updatedSample = getSampleReportById(sampleId, language);
-        if (updatedSample) {
-          setAnalysis(updatedSample.analysis);
-        }
-      } else {
-        translateReportResult(analysis, language)
-          .then((translated) => {
-            if (translated) setAnalysis(translated);
-          })
-          .catch((err) => {
-            console.warn('Failed to translate custom report:', err);
-          });
-      }
+    if (!sourceAnalysis) return;
+
+    let cancelled = false;
+    if (sourceAnalysis.fileType === 'sample') {
+      const sampleId = sourceAnalysis.id.replace('-analysis', '');
+      const updatedSample = getSampleReportById(sampleId, language);
+      if (updatedSample && !cancelled) setAnalysis(updatedSample.analysis);
+    } else {
+      translateReportResult(sourceAnalysis, language)
+        .then((translated) => {
+          if (translated && !cancelled) setAnalysis(translated);
+        })
+        .catch((err) => {
+          console.warn('Failed to translate custom report:', err);
+        });
     }
-  }, [language]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, sourceAnalysis]);
 
   // Handle local File Upload (PDF, JPG, PNG, HEIC, etc.)
   const handleFileUpload = async (file: File) => {
@@ -88,6 +97,7 @@ export default function App() {
         language
       );
 
+      setSourceAnalysis(result);
       setAnalysis(result);
       setActiveTab('summary');
     } catch (err: any) {
@@ -128,6 +138,7 @@ export default function App() {
         'camera_capture',
         language
       );
+      setSourceAnalysis(result);
       setAnalysis(result);
       setActiveTab('summary');
     } catch (err: any) {
@@ -140,6 +151,7 @@ export default function App() {
 
   // Load sample demo report
   const handleSelectSample = (sample: SampleReport) => {
+    setSourceAnalysis(sample.analysis);
     setAnalysis(sample.analysis);
     setActiveTab('summary');
     setErrorMessage(null);
@@ -147,6 +159,7 @@ export default function App() {
 
   // Reset application
   const handleReset = () => {
+    setSourceAnalysis(null);
     setAnalysis(null);
     setActiveTab('summary');
     setErrorMessage(null);
