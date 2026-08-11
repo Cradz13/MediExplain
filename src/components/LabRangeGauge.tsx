@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Language, translations } from '../utils/i18n';
 
 interface LabRangeGaugeProps {
   valueStr: string;
@@ -11,6 +12,7 @@ interface LabRangeGaugeProps {
   unit: string;
   status: 'normal' | 'discussion' | 'attention';
   compact?: boolean;
+  language?: Language;
 }
 
 export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
@@ -19,7 +21,9 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
   unit,
   status,
   compact = false,
+  language = 'en',
 }) => {
+  const t = translations[language];
   // Parse numerical value
   const numVal = parseFloat(valueStr.replace(/[^0-9.]/g, ''));
   if (isNaN(numVal)) return null;
@@ -102,7 +106,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
   return (
     <div className="w-full space-y-2 p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10">
       <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-gray-300">
-        <span>Reference Spectrum</span>
+        <span>{t.referenceSpectrum}</span>
         <span className="font-mono text-[11px] text-slate-500 dark:text-gray-400">
           Range: <strong className="text-slate-900 dark:text-white">{referenceRangeStr} {unit}</strong>
         </span>

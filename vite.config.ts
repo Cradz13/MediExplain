@@ -14,6 +14,8 @@ export default defineConfig(() => {
     server: {
       hmr: false,
       watch: null,
+      // Allow sandbox/preview hosts (e.g. *.e2b.app) to reach the dev server.
+      allowedHosts: true as const,
     },
   };
 });

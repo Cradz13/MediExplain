@@ -78,7 +78,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-2xl sm:text-3xl font-serif font-light text-slate-900 dark:text-white">
-                {analysis.patientInfo?.reportType || analysis.fileName} <span className="text-blue-600 dark:text-blue-400 font-serif italic text-xl">Analyzed Panel</span>
+                {analysis.patientInfo?.reportType || analysis.fileName} <span className="text-blue-600 dark:text-blue-400 font-serif italic text-xl">{t.analyzedPanel}</span>
               </h2>
               <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shrink-0">
                 Patient Report

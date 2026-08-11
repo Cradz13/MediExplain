@@ -44,7 +44,7 @@ export const DisclaimerBanner: React.FC<DisclaimerBannerProps> = ({
         </div>
         <div className="shrink-0 hidden md:block">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-400/20">
-            Non-Diagnostic AI
+            {t.nonDiagnosticBadge}
           </span>
         </div>
       </div>

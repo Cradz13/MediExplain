@@ -205,7 +205,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
                 value={newQuestionInput}
                 onChange={(e) => setNewQuestionInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddQuestion()}
-                placeholder="Add your own custom question for the doctor..."
+                placeholder={t.customQuestionPlaceholder}
                 className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
               />
               <button
@@ -268,7 +268,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
             <textarea
               value={customNotes}
               onChange={(e) => setCustomNotes(e.target.value)}
-              placeholder="Jot down symptoms, medication notes, or doctor responses during your appointment..."
+              placeholder={t.appointmentNotesPlaceholder}
               rows={4}
               className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
             />

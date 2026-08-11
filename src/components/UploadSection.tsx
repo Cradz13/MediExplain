@@ -15,7 +15,8 @@ import {
   AlertCircle,
   FileSpreadsheet
 } from 'lucide-react';
-import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
+import { getSampleReports, SampleReport } from '../data/sampleReports';
+import { UPLOAD_ACCEPT_ATTRIBUTE } from '../utils/fileProcessing';
 import { Language, translations } from '../utils/i18n';
 
 interface UploadSectionProps {
@@ -53,16 +54,47 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      onFileUpload(e.dataTransfer.files[0]);
+
+    if (isAnalyzing) return;
+
+    const dt = e.dataTransfer;
+
+    // Prefer the items API: it exposes the real File for dragged items and
+    // ignores dragged text/URLs that would otherwise produce an empty upload.
+    if (dt.items && dt.items.length > 0) {
+      for (let i = 0; i < dt.items.length; i++) {
+        const item = dt.items[i];
+        if (item.kind === 'file') {
+          const file = item.getAsFile();
+          if (file) {
+            onFileUpload(file);
+            return;
+          }
+        }
+      }
+    }
+
+    if (dt.files && dt.files.length > 0) {
+      onFileUpload(dt.files[0]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onFileUpload(e.target.files[0]);
+    const file = e.target.files?.[0];
+
+    // Reset the input so choosing the SAME file again still fires onChange.
+    e.target.value = '';
+
+    if (file) {
+      onFileUpload(file);
     }
+  };
+
+  const openFilePicker = () => {
+    if (isAnalyzing) return;
+    fileInputRef.current?.click();
   };
 
   return (
@@ -107,20 +139,30 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Range Check</span>
+              <span>{t.rangeCheckBadge}</span>
             </div>
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Doctor Prep</span>
+              <span>{t.doctorPrepBadge}</span>
             </div>
           </div>
         </div>
       ) : (
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={t.dragDropPrompt}
           onDragOver={handleDragOver}
+          onDragEnter={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
+          onClick={openFilePicker}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openFilePicker();
+            }
+          }}
           className={`relative bg-white dark:bg-white/[0.03] rounded-3xl p-8 sm:p-12 border-2 border-dashed transition-all cursor-pointer shadow-xl group ${
             isDragging
               ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-500/10 scale-[1.01]'
@@ -131,7 +173,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
-            accept=".pdf,image/*"
+            accept={UPLOAD_ACCEPT_ATTRIBUTE}
             className="hidden"
           />
 
@@ -154,7 +196,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  fileInputRef.current?.click();
+                  openFilePicker();
                 }}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)]"
               >
@@ -196,7 +238,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {SAMPLE_REPORTS.map((sample) => (
+          {getSampleReports(language).map((sample) => (
             <div
               key={sample.id}
               onClick={() => onSelectSample(sample)}

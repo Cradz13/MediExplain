@@ -306,7 +306,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
         {/* Preset Question Pills */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           <span className="text-xs text-gray-400 font-semibold shrink-0 flex items-center gap-1">
-            <HelpCircle className="w-3.5 h-3.5 text-blue-400" /> Presets:
+            <HelpCircle className="w-3.5 h-3.5 text-blue-400" /> {t.presetsLabel}
           </span>
           {PRESET_QUESTIONS.map((q, idx) => (
             <button
@@ -331,7 +331,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             value={customQuery}
             onChange={(e) => setCustomQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleScanQuestion()}
-            placeholder="Ask a question about what you're pointing the camera at..."
+            placeholder={t.cameraInputPlaceholder}
             className="flex-1 bg-white/5 border border-white/10 text-white text-xs rounded-full px-5 py-3 focus:outline-none focus:border-blue-500 placeholder-gray-500"
           />
 
@@ -342,7 +342,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             className="px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)] disabled:opacity-50"
           >
             <Scan className="w-4 h-4" />
-            <span>Analyze Frame</span>
+            <span>{t.analyzeFrameBtn}</span>
           </button>
 
           <button
@@ -351,7 +351,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             className="px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-lg shadow-emerald-600/20"
           >
             <FileCheck2 className="w-4 h-4" />
-            <span>Process Full Report</span>
+            <span>{t.processFullReportBtn}</span>
           </button>
         </div>
       </div>

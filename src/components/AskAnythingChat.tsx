@@ -199,7 +199,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
               <div className="w-9 h-9 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                 <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
               </div>
-              <span className="text-slate-600 dark:text-gray-400">MediExplain AI is analyzing your query...</span>
+              <span className="text-slate-600 dark:text-gray-400">{t.aiAnalyzingQuery}</span>
             </div>
           )}
 

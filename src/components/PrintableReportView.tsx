@@ -5,13 +5,17 @@
 
 import React from 'react';
 import { ReportAnalysisResult } from '../types';
+import { Language, translations } from '../utils/i18n';
 import { Stethoscope, CheckCircle2, HelpCircle, AlertCircle } from 'lucide-react';
 
 interface PrintableReportViewProps {
   analysis: ReportAnalysisResult;
+  language?: Language;
 }
 
-export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analysis }) => {
+export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analysis, language = 'en' }) => {
+  const t = translations[language];
+
   return (
     <div id="printable-area" className="hidden print:block bg-white text-slate-900 p-8 max-w-4xl mx-auto space-y-6">
       
@@ -23,7 +27,7 @@ export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analys
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">MediExplain</h1>
-            <p className="text-xs text-slate-500">Patient Educational Summary Sheet</p>
+            <p className="text-xs text-slate-500">{t.printSubtitle}</p>
           </div>
         </div>
 
@@ -62,10 +66,10 @@ export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analys
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b-2 border-slate-400 bg-slate-50">
-              <th className="py-2 px-1">Test Name</th>
-              <th className="py-2 px-1">Result</th>
-              <th className="py-2 px-1">Reference Range</th>
-              <th className="py-2 px-1">Status</th>
+              <th className="py-2 px-1">{t.thTestName}</th>
+              <th className="py-2 px-1">{t.thResult}</th>
+              <th className="py-2 px-1">{t.thReferenceRange}</th>
+              <th className="py-2 px-1">{t.thStatus}</th>
             </tr>
           </thead>
           <tbody>

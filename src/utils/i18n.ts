@@ -45,6 +45,24 @@ export interface Translations {
   doctorPrepStep: string;
   orTestWithDemo: string;
   viewSampleReport: string;
+  dragDropPrompt: string;
+  supportedFormats: string;
+  uploadPdfBtn: string;
+  takePhotoBtn: string;
+  analyzingReportTitle: string;
+  analyzingReportStep: string;
+  demoReportsTitle: string;
+
+  // Upload steps & errors
+  stepReadingFile: string;
+  stepOptimizingImage: string;
+  stepAnalyzing: string;
+  errorUnsupportedType: string;
+  errorFileTooLarge: string;
+  errorPdfTooLarge: string;
+  errorEmptyFile: string;
+  errorReadFailed: string;
+  errorAnalyzeFailed: string;
 
   // Report Summary View
   patientInfoDate: string;
@@ -99,6 +117,9 @@ export interface Translations {
   recommendedPriority: string;
   standardPriority: string;
 
+  askAnythingHeader: string;
+  askAnythingPlaceholder: string;
+
   // Ask Anything Chat
   chatSafetyBannerTitle: string;
   chatSafetyBannerText: string;
@@ -120,6 +141,29 @@ export interface Translations {
   // Disclaimer
   disclaimerTitle: string;
   disclaimerBody: string;
+  disclaimerDesc: string;
+  criticalAlertTitle: string;
+  criticalAlertDesc: string;
+
+  // Shared UI labels
+  customQuestionPlaceholder: string;
+  appointmentNotesPlaceholder: string;
+  referenceSpectrum: string;
+  yourReportedResult: string;
+  standardReferenceRange: string;
+  selectLanguageLabel: string;
+  printSubtitle: string;
+  thTestName: string;
+  thResult: string;
+  thReferenceRange: string;
+  thStatus: string;
+  thLabParameter: string;
+  thProgressTrend: string;
+  baselineLabel: string;
+  analyzedPanel: string;
+  rangeCheckBadge: string;
+  doctorPrepBadge: string;
+  nonDiagnosticBadge: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -160,6 +204,23 @@ export const translations: Record<Language, Translations> = {
     doctorPrepStep: 'Doctor Prep',
     orTestWithDemo: 'Or test instantly with pre-loaded demo medical reports:',
     viewSampleReport: 'View Sample Report',
+    dragDropPrompt: 'Drag & drop your medical report here, or click to browse',
+    supportedFormats: 'PDF, JPG, PNG, WEBP, HEIC — up to 20 MB',
+    uploadPdfBtn: 'Upload PDF / Image',
+    takePhotoBtn: 'Take Photo / Camera Scanner',
+    analyzingReportTitle: 'Analyzing Medical Report...',
+    analyzingReportStep: 'Gemini Vision is reading medical tables, reference ranges, and clinical text...',
+    demoReportsTitle: 'Or test instantly with a demo report',
+
+    stepReadingFile: 'Reading document and processing image/PDF bytes...',
+    stepOptimizingImage: 'Optimizing image for analysis...',
+    stepAnalyzing: 'Gemini is analyzing medical tables & terminology...',
+    errorUnsupportedType: 'Unsupported file type. Please upload a PDF or an image (JPG, PNG, WEBP, HEIC).',
+    errorFileTooLarge: 'This file is too large. Please upload a file under 20 MB.',
+    errorPdfTooLarge: 'This PDF is too large to analyze (limit around 4 MB). Please upload a smaller PDF, or take a photo of the pages you want explained.',
+    errorEmptyFile: 'This file appears to be empty. Please choose another file.',
+    errorReadFailed: 'Failed to read the selected file. Please try again with another file.',
+    errorAnalyzeFailed: 'Failed to analyze the medical report. Please try again.',
 
     patientInfoDate: 'Patient Info & Date',
     reportDate: 'Report Date',
@@ -210,6 +271,9 @@ export const translations: Record<Language, Translations> = {
     recommendedPriority: 'Recommended',
     standardPriority: 'Standard',
 
+    askAnythingHeader: 'Hi! Ask me anything about your medical report',
+    askAnythingPlaceholder: 'Ask anything about your report...',
+
     chatSafetyBannerTitle: 'Educational AI Assistant',
     chatSafetyBannerText: 'Answers are generated based solely on your uploaded report. This tool does not provide medical diagnosis, prescription advice, or treatment plans. Always consult your doctor.',
     suggestedPrompts: 'Suggested:',
@@ -227,7 +291,28 @@ export const translations: Record<Language, Translations> = {
     processFullReportBtn: 'Process Full Report',
 
     disclaimerTitle: 'Educational Disclaimer',
-    disclaimerBody: 'MediExplain is for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment.'
+    disclaimerBody: 'MediExplain is for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment.',
+    disclaimerDesc: ' — MediExplain is for educational purposes only and does not replace professional medical advice, diagnosis, or treatment.',
+    criticalAlertTitle: 'Critical findings detected',
+    criticalAlertDesc: 'This report contains one or more values that may require prompt medical review. Please contact your doctor or emergency services without delay.',
+    customQuestionPlaceholder: 'Add your own custom question for the doctor...',
+    appointmentNotesPlaceholder: 'Jot down symptoms, medication notes, or doctor responses during your appointment...',
+    referenceSpectrum: 'Reference Spectrum',
+    yourReportedResult: 'Your Reported Result',
+    standardReferenceRange: 'Standard Reference Range',
+    selectLanguageLabel: 'Select Language',
+    printSubtitle: 'Patient Educational Summary Sheet',
+    thTestName: 'Test Name',
+    thResult: 'Result',
+    thReferenceRange: 'Reference Range',
+    thStatus: 'Status',
+    thLabParameter: 'Lab Parameter',
+    thProgressTrend: 'Progress Trend',
+    baselineLabel: 'Baseline',
+    analyzedPanel: 'Analyzed Panel',
+    rangeCheckBadge: 'Range Check',
+    doctorPrepBadge: 'Doctor Prep',
+    nonDiagnosticBadge: 'Non-Diagnostic AI',
   },
   fr: {
     brandTitle: 'MediExplain',
@@ -266,6 +351,23 @@ export const translations: Record<Language, Translations> = {
     doctorPrepStep: 'Préparation Docteur',
     orTestWithDemo: 'Ou testez immédiatement avec un rapport exemple préchargé :',
     viewSampleReport: 'Voir l\'Exemple',
+    dragDropPrompt: 'Glissez-déposez votre rapport médical ici, ou cliquez pour parcourir',
+    supportedFormats: 'PDF, JPG, PNG, WEBP, HEIC — jusqu\'à 20 Mo',
+    uploadPdfBtn: 'Téléverser PDF / Image',
+    takePhotoBtn: 'Prendre une Photo / Scanner',
+    analyzingReportTitle: 'Analyse du rapport médical en cours...',
+    analyzingReportStep: 'Gemini Vision lit les tableaux d\'analyse, les valeurs de référence et le texte clinique...',
+    demoReportsTitle: 'Ou testez immédiatement avec un rapport de démonstration',
+
+    stepReadingFile: 'Lecture du document et traitement des données image/PDF...',
+    stepOptimizingImage: 'Optimisation de l\'image pour l\'analyse...',
+    stepAnalyzing: 'Gemini analyse les tableaux et la terminologie médicale...',
+    errorUnsupportedType: 'Type de fichier non pris en charge. Veuillez téléverser un PDF ou une image (JPG, PNG, WEBP, HEIC).',
+    errorFileTooLarge: 'Ce fichier est trop volumineux. Veuillez téléverser un fichier de moins de 20 Mo.',
+    errorPdfTooLarge: "Ce PDF est trop volumineux pour être analysé (limite d'environ 4 Mo). Veuillez téléverser un PDF plus petit, ou prendre une photo des pages à expliquer.",
+    errorEmptyFile: 'Ce fichier semble vide. Veuillez choisir un autre fichier.',
+    errorReadFailed: 'Impossible de lire le fichier sélectionné. Veuillez réessayer avec un autre fichier.',
+    errorAnalyzeFailed: 'Échec de l\'analyse du rapport médical. Veuillez réessayer.',
 
     patientInfoDate: 'Informations Patient & Date',
     reportDate: 'Date du Rapport',
@@ -316,6 +418,9 @@ export const translations: Record<Language, Translations> = {
     recommendedPriority: 'Recommandé',
     standardPriority: 'Standard',
 
+    askAnythingHeader: 'Bonjour ! Posez-moi toutes vos questions sur votre rapport médical',
+    askAnythingPlaceholder: 'Posez une question sur votre rapport...',
+
     chatSafetyBannerTitle: 'Assistant IA Éducatif',
     chatSafetyBannerText: 'Les réponses sont générées uniquement à partir de votre rapport. Cet outil ne fournit aucun diagnostic médical ni ordonnance. Consultez toujours votre médecin.',
     suggestedPrompts: 'Suggestions :',
@@ -333,7 +438,28 @@ export const translations: Record<Language, Translations> = {
     processFullReportBtn: 'Traiter le Rapport Complet',
 
     disclaimerTitle: 'Avertissement Éducatif',
-    disclaimerBody: 'MediExplain est un outil purement éducatif et informatif. Il ne remplace en aucun cas l\'avis, le diagnostic ou le traitement d\'un professionnel de santé.'
+    disclaimerBody: 'MediExplain est un outil purement éducatif et informatif. Il ne remplace en aucun cas l\'avis, le diagnostic ou le traitement d\'un professionnel de santé.',
+    disclaimerDesc: ' — MediExplain est un outil éducatif uniquement et ne remplace pas l\'avis, le diagnostic ou le traitement d\'un professionnel de santé.',
+    criticalAlertTitle: 'Résultats critiques détectés',
+    criticalAlertDesc: 'Ce rapport contient une ou plusieurs valeurs pouvant nécessiter un avis médical rapide. Contactez votre médecin ou les services d\'urgence sans tarder.',
+    customQuestionPlaceholder: 'Ajoutez votre propre question pour le médecin...',
+    appointmentNotesPlaceholder: 'Notez les symptômes, les médicaments ou les réponses du médecin pendant votre rendez-vous...',
+    referenceSpectrum: 'Spectre de Référence',
+    yourReportedResult: 'Votre Résultat',
+    standardReferenceRange: 'Plage de Référence Standard',
+    selectLanguageLabel: 'Choisir la langue',
+    printSubtitle: 'Fiche de Synthèse Éducative pour le Patient',
+    thTestName: 'Nom du Test',
+    thResult: 'Résultat',
+    thReferenceRange: 'Plage de Référence',
+    thStatus: 'Statut',
+    thLabParameter: 'Paramètre de Laboratoire',
+    thProgressTrend: 'Tendance',
+    baselineLabel: 'Référence Initiale',
+    analyzedPanel: 'Bilan Analysé',
+    rangeCheckBadge: 'Vérification des Plages',
+    doctorPrepBadge: 'Préparation Médecin',
+    nonDiagnosticBadge: 'IA Non Diagnostique',
   },
   ar: {
     brandTitle: 'MediExplain',
@@ -372,6 +498,23 @@ export const translations: Record<Language, Translations> = {
     doctorPrepStep: 'تحضير استشارة الطبيب',
     orTestWithDemo: 'أو جرب فوراً باستخدام تقارير نموذجية مسبقة التحميل:',
     viewSampleReport: 'عرض التقرير النموذج',
+    dragDropPrompt: 'اسحب وأسقط تقريرك الطبي هنا، أو انقر للتصفح',
+    supportedFormats: 'PDF، JPG، PNG، WEBP، HEIC — حتى 20 ميغابايت',
+    uploadPdfBtn: 'تحميل ملف PDF / صورة',
+    takePhotoBtn: 'التقاط صورة / ماسح الكاميرا',
+    analyzingReportTitle: 'جاري تحليل التقرير الطبي...',
+    analyzingReportStep: 'يقوم Gemini Vision بقراءة الجداول والمدى المرجعي والنصوص السريرية...',
+    demoReportsTitle: 'أو جرب فوراً باستخدام تقرير نموذجي',
+
+    stepReadingFile: 'جاري قراءة المستند ومعالجة بيانات الصورة/PDF...',
+    stepOptimizingImage: 'جاري تحسين الصورة للتحليل...',
+    stepAnalyzing: 'يقوم Gemini بتحليل الجداول والمصطلحات الطبية...',
+    errorUnsupportedType: 'نوع الملف غير مدعوم. يرجى تحميل ملف PDF أو صورة (JPG، PNG، WEBP، HEIC).',
+    errorFileTooLarge: 'حجم الملف كبير جداً. يرجى تحميل ملف أقل من 20 ميغابايت.',
+    errorPdfTooLarge: 'ملف PDF هذا كبير جداً للتحليل (الحد الأقصى حوالي 4 ميغابايت). يرجى تحميل ملف أصغر، أو التقاط صورة للصفحات المطلوب شرحها.',
+    errorEmptyFile: 'يبدو أن هذا الملف فارغ. يرجى اختيار ملف آخر.',
+    errorReadFailed: 'تعذر قراءة الملف المحدد. يرجى المحاولة مرة أخرى بملف آخر.',
+    errorAnalyzeFailed: 'فشل تحليل التقرير الطبي. يرجى المحاولة مرة أخرى.',
 
     patientInfoDate: 'معلومات المريض والتاريخ',
     reportDate: 'تاريخ التقرير',
@@ -422,6 +565,9 @@ export const translations: Record<Language, Translations> = {
     recommendedPriority: 'موصى به',
     standardPriority: 'قياسي',
 
+    askAnythingHeader: 'مرحباً! اسألني أي شيء عن تقريرك الطبي',
+    askAnythingPlaceholder: 'اسأل أي سؤال عن تقريرك...',
+
     chatSafetyBannerTitle: 'مساعد الذكاء الاصطناعي التعليمي',
     chatSafetyBannerText: 'يتم توليد الإجابات بناءً على تقريرك المرفوع فقط. هذه الأداة لا تقدم تشخيصاً طبياً أو نصائح وصفات علاجية. استشر طبيبك دائماً.',
     suggestedPrompts: 'مقترحات:',
@@ -439,6 +585,27 @@ export const translations: Record<Language, Translations> = {
     processFullReportBtn: 'معالجة التقرير بالكامل',
 
     disclaimerTitle: 'إخلاء مسؤولية تعليمي',
-    disclaimerBody: 'MediExplain مخصص لأغراض تعليمية وإعلامية فقط. لا يعد بديلاً عن الاستشارة الطبية الاحترافية أو التشخيص أو العلاج.'
+    disclaimerBody: 'MediExplain مخصص لأغراض تعليمية وإعلامية فقط. لا يعد بديلاً عن الاستشارة الطبية الاحترافية أو التشخيص أو العلاج.',
+    disclaimerDesc: ' — MediExplain أداة تعليمية فقط ولا تحل محل الاستشارة الطبية الاحترافية أو التشخيص أو العلاج.',
+    criticalAlertTitle: 'تم اكتشاف نتائج حرجة',
+    criticalAlertDesc: 'يحتوي هذا التقرير على قيمة أو أكثر قد تتطلب مراجعة طبية عاجلة. يرجى الاتصال بطبيبك أو خدمات الطوارئ دون تأخير.',
+    customQuestionPlaceholder: 'أضف سؤالك الخاص للطبيب...',
+    appointmentNotesPlaceholder: 'دوّن الأعراض أو الأدوية أو إجابات الطبيب أثناء موعدك...',
+    referenceSpectrum: 'النطاق المرجعي',
+    yourReportedResult: 'نتيجتك المسجلة',
+    standardReferenceRange: 'النطاق المرجعي القياسي',
+    selectLanguageLabel: 'اختر اللغة',
+    printSubtitle: 'ورقة ملخص تعليمية للمريض',
+    thTestName: 'اسم الفحص',
+    thResult: 'النتيجة',
+    thReferenceRange: 'النطاق المرجعي',
+    thStatus: 'الحالة',
+    thLabParameter: 'مؤشر المختبر',
+    thProgressTrend: 'اتجاه التطور',
+    baselineLabel: 'القياس الأساسي',
+    analyzedPanel: 'التحليل المدروس',
+    rangeCheckBadge: 'فحص النطاقات',
+    doctorPrepBadge: 'تحضير الطبيب',
+    nonDiagnosticBadge: 'ذكاء اصطناعي غير تشخيصي',
   }
 };
