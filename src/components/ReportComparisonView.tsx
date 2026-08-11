@@ -141,11 +141,11 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 dark:border-white/10 text-slate-400 dark:text-gray-500 uppercase tracking-wider text-[10px] font-bold">
-                <th className="py-3 px-4">Lab Parameter</th>
+                <th className="py-3 px-4">{t.thLabParameter}</th>
                 <th className="py-3 px-4">Current Value ({currentAnalysis.patientInfo?.date || 'Today'})</th>
                 <th className="py-3 px-4">Previous Value ({comparisonAnalysis?.patientInfo?.date || 'Prior'})</th>
                 <th className="py-3 px-4">Difference (Delta)</th>
-                <th className="py-3 px-4">Progress Trend</th>
+                <th className="py-3 px-4">{t.thProgressTrend}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-sans">
@@ -189,7 +189,7 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
                       </span>
                     )}
                     {item.trend === 'unknown' && (
-                      <span className="text-slate-400 dark:text-gray-500 text-[11px] font-normal">Baseline</span>
+                      <span className="text-slate-400 dark:text-gray-500 text-[11px] font-normal">{t.baselineLabel}</span>
                     )}
                   </td>
                 </tr>

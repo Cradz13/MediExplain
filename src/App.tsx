@@ -239,7 +239,7 @@ export default function App() {
       </main>
 
       {/* Printable Report Hidden Container */}
-      {analysis && <PrintableReportView analysis={analysis} />}
+      {analysis && <PrintableReportView analysis={analysis} language={language} />}
 
       {/* Live Camera Scanner Modal */}
       {showLiveCamera && (

@@ -179,6 +179,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 unit={item.unit}
                 status={item.status}
                 compact={true}
+                language={language}
               />
 
               {/* Explanatory summary preview */}
@@ -223,13 +224,13 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
             {/* Status & Value summary */}
             <div className="p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-between">
               <div>
-                <div className="text-xs text-slate-500 dark:text-gray-400">Your Reported Result</div>
+                <div className="text-xs text-slate-500 dark:text-gray-400">{t.yourReportedResult}</div>
                 <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
                   {activeModalItem.value} <span className="text-xs font-sans text-slate-500 dark:text-gray-400">{activeModalItem.unit}</span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-slate-500 dark:text-gray-400">Standard Reference Range</div>
+                <div className="text-xs text-slate-500 dark:text-gray-400">{t.standardReferenceRange}</div>
                 <div className="text-sm font-mono font-semibold text-slate-700 dark:text-gray-300">
                   {activeModalItem.referenceRange} {activeModalItem.unit}
                 </div>
@@ -243,6 +244,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
               unit={activeModalItem.unit}
               status={activeModalItem.status}
               compact={false}
+              language={language}
             />
 
             {/* What it measures */}

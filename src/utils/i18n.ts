@@ -144,6 +144,26 @@ export interface Translations {
   disclaimerDesc: string;
   criticalAlertTitle: string;
   criticalAlertDesc: string;
+
+  // Shared UI labels
+  customQuestionPlaceholder: string;
+  appointmentNotesPlaceholder: string;
+  referenceSpectrum: string;
+  yourReportedResult: string;
+  standardReferenceRange: string;
+  selectLanguageLabel: string;
+  printSubtitle: string;
+  thTestName: string;
+  thResult: string;
+  thReferenceRange: string;
+  thStatus: string;
+  thLabParameter: string;
+  thProgressTrend: string;
+  baselineLabel: string;
+  analyzedPanel: string;
+  rangeCheckBadge: string;
+  doctorPrepBadge: string;
+  nonDiagnosticBadge: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -274,7 +294,25 @@ export const translations: Record<Language, Translations> = {
     disclaimerBody: 'MediExplain is for educational and informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment.',
     disclaimerDesc: ' — MediExplain is for educational purposes only and does not replace professional medical advice, diagnosis, or treatment.',
     criticalAlertTitle: 'Critical findings detected',
-    criticalAlertDesc: 'This report contains one or more values that may require prompt medical review. Please contact your doctor or emergency services without delay.'
+    criticalAlertDesc: 'This report contains one or more values that may require prompt medical review. Please contact your doctor or emergency services without delay.',
+    customQuestionPlaceholder: 'Add your own custom question for the doctor...',
+    appointmentNotesPlaceholder: 'Jot down symptoms, medication notes, or doctor responses during your appointment...',
+    referenceSpectrum: 'Reference Spectrum',
+    yourReportedResult: 'Your Reported Result',
+    standardReferenceRange: 'Standard Reference Range',
+    selectLanguageLabel: 'Select Language',
+    printSubtitle: 'Patient Educational Summary Sheet',
+    thTestName: 'Test Name',
+    thResult: 'Result',
+    thReferenceRange: 'Reference Range',
+    thStatus: 'Status',
+    thLabParameter: 'Lab Parameter',
+    thProgressTrend: 'Progress Trend',
+    baselineLabel: 'Baseline',
+    analyzedPanel: 'Analyzed Panel',
+    rangeCheckBadge: 'Range Check',
+    doctorPrepBadge: 'Doctor Prep',
+    nonDiagnosticBadge: 'Non-Diagnostic AI',
   },
   fr: {
     brandTitle: 'MediExplain',
@@ -403,7 +441,25 @@ export const translations: Record<Language, Translations> = {
     disclaimerBody: 'MediExplain est un outil purement éducatif et informatif. Il ne remplace en aucun cas l\'avis, le diagnostic ou le traitement d\'un professionnel de santé.',
     disclaimerDesc: ' — MediExplain est un outil éducatif uniquement et ne remplace pas l\'avis, le diagnostic ou le traitement d\'un professionnel de santé.',
     criticalAlertTitle: 'Résultats critiques détectés',
-    criticalAlertDesc: 'Ce rapport contient une ou plusieurs valeurs pouvant nécessiter un avis médical rapide. Contactez votre médecin ou les services d\'urgence sans tarder.'
+    criticalAlertDesc: 'Ce rapport contient une ou plusieurs valeurs pouvant nécessiter un avis médical rapide. Contactez votre médecin ou les services d\'urgence sans tarder.',
+    customQuestionPlaceholder: 'Ajoutez votre propre question pour le médecin...',
+    appointmentNotesPlaceholder: 'Notez les symptômes, les médicaments ou les réponses du médecin pendant votre rendez-vous...',
+    referenceSpectrum: 'Spectre de Référence',
+    yourReportedResult: 'Votre Résultat',
+    standardReferenceRange: 'Plage de Référence Standard',
+    selectLanguageLabel: 'Choisir la langue',
+    printSubtitle: 'Fiche de Synthèse Éducative pour le Patient',
+    thTestName: 'Nom du Test',
+    thResult: 'Résultat',
+    thReferenceRange: 'Plage de Référence',
+    thStatus: 'Statut',
+    thLabParameter: 'Paramètre de Laboratoire',
+    thProgressTrend: 'Tendance',
+    baselineLabel: 'Référence Initiale',
+    analyzedPanel: 'Bilan Analysé',
+    rangeCheckBadge: 'Vérification des Plages',
+    doctorPrepBadge: 'Préparation Médecin',
+    nonDiagnosticBadge: 'IA Non Diagnostique',
   },
   ar: {
     brandTitle: 'MediExplain',
@@ -532,6 +588,24 @@ export const translations: Record<Language, Translations> = {
     disclaimerBody: 'MediExplain مخصص لأغراض تعليمية وإعلامية فقط. لا يعد بديلاً عن الاستشارة الطبية الاحترافية أو التشخيص أو العلاج.',
     disclaimerDesc: ' — MediExplain أداة تعليمية فقط ولا تحل محل الاستشارة الطبية الاحترافية أو التشخيص أو العلاج.',
     criticalAlertTitle: 'تم اكتشاف نتائج حرجة',
-    criticalAlertDesc: 'يحتوي هذا التقرير على قيمة أو أكثر قد تتطلب مراجعة طبية عاجلة. يرجى الاتصال بطبيبك أو خدمات الطوارئ دون تأخير.'
+    criticalAlertDesc: 'يحتوي هذا التقرير على قيمة أو أكثر قد تتطلب مراجعة طبية عاجلة. يرجى الاتصال بطبيبك أو خدمات الطوارئ دون تأخير.',
+    customQuestionPlaceholder: 'أضف سؤالك الخاص للطبيب...',
+    appointmentNotesPlaceholder: 'دوّن الأعراض أو الأدوية أو إجابات الطبيب أثناء موعدك...',
+    referenceSpectrum: 'النطاق المرجعي',
+    yourReportedResult: 'نتيجتك المسجلة',
+    standardReferenceRange: 'النطاق المرجعي القياسي',
+    selectLanguageLabel: 'اختر اللغة',
+    printSubtitle: 'ورقة ملخص تعليمية للمريض',
+    thTestName: 'اسم الفحص',
+    thResult: 'النتيجة',
+    thReferenceRange: 'النطاق المرجعي',
+    thStatus: 'الحالة',
+    thLabParameter: 'مؤشر المختبر',
+    thProgressTrend: 'اتجاه التطور',
+    baselineLabel: 'القياس الأساسي',
+    analyzedPanel: 'التحليل المدروس',
+    rangeCheckBadge: 'فحص النطاقات',
+    doctorPrepBadge: 'تحضير الطبيب',
+    nonDiagnosticBadge: 'ذكاء اصطناعي غير تشخيصي',
   }
 };

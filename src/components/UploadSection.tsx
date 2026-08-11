@@ -139,11 +139,11 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
             </div>
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Range Check</span>
+              <span>{t.rangeCheckBadge}</span>
             </div>
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Doctor Prep</span>
+              <span>{t.doctorPrepBadge}</span>
             </div>
           </div>
         </div>
