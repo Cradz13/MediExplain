@@ -164,6 +164,84 @@ export interface Translations {
   rangeCheckBadge: string;
   doctorPrepBadge: string;
   nonDiagnosticBadge: string;
+  footerText: string;
+  viewingLabel: string;
+  poweredByGemini: string;
+  ocrVisionBadge: string;
+  chatErrorPrefix: string;
+  tryAgain: string;
+  patientReportBadge: string;
+  reportDateLabel: string;
+  facilityLabel: string;
+  labTestsIdentified: string;
+  stopNarration: string;
+  listenToSummary: string;
+  copiedLabel: string;
+  copyLabel: string;
+  executiveAiSummary: string;
+  plainLanguageExplanation: string;
+  laymanGuideBadge: string;
+  labValuesLabel: string;
+  labValuesHint: string;
+  medicalTermsLabel: string;
+  medicalTermsHint: string;
+  doctorQuestionsLabel: string;
+  doctorQuestionsHint: string;
+  importantFindingsTitle: string;
+  safetyNotesTitle: string;
+  generalCategory: string;
+  refLabel: string;
+  viewWhyItMatters: string;
+  whatThisValueMeasures: string;
+  whyItMattersHealth: string;
+  closeBreakdown: string;
+  lowLabel: string;
+  normalLabel: string;
+  highLabel: string;
+  rangeLabel: string;
+  targetRange: string;
+  yourValueLabel: string;
+  measuredValueLabel: string;
+  whyAskLabel: string;
+  addLabel: string;
+  keyDiscussionPoints: string;
+  personalAppointmentNotes: string;
+  historicalTrendBadge: string;
+  compareLabTitle: string;
+  compareLabSubtitle: string;
+  compareWithLabel: string;
+  keyComparisonInsights: string;
+  comparingWord: string;
+  againstWord: string;
+  previousTestLabel: string;
+  comparisonSummaryTail: string;
+  outOfWord: string;
+  sideBySideTitle: string;
+  currentValueLabel: string;
+  previousValueLabel: string;
+  differenceLabel: string;
+  trendImproved: string;
+  trendElevated: string;
+  trendStable: string;
+  notAvailableShort: string;
+  todayLabel: string;
+  priorLabel: string;
+  printDocumentLabel: string;
+  printDisclaimer: string;
+  printSection1: string;
+  printSection2: string;
+  printSection3: string;
+  printSection4: string;
+  cameraScannerSubtitle: string;
+  muteSpeech: string;
+  enableSpeech: string;
+  returnToUpload: string;
+  liveCameraInsights: string;
+  speakingLabel: string;
+  detectedValuesInFrame: string;
+  cameraAccessError: string;
+  frameCaptureError: string;
+  frameAnalyzeError: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -313,6 +391,84 @@ export const translations: Record<Language, Translations> = {
     rangeCheckBadge: 'Range Check',
     doctorPrepBadge: 'Doctor Prep',
     nonDiagnosticBadge: 'Non-Diagnostic AI',
+    footerText: 'MediExplain © 2026. Educational Medical Report Assistant.',
+    viewingLabel: 'Viewing:',
+    poweredByGemini: 'Powered by Gemini 3.6 Flash & Vision',
+    ocrVisionBadge: 'OCR & Vision',
+    chatErrorPrefix: 'I encountered an issue processing your request:',
+    tryAgain: 'Please try again.',
+    patientReportBadge: 'Patient Report',
+    reportDateLabel: 'Report Date:',
+    facilityLabel: 'Facility:',
+    labTestsIdentified: 'Lab Tests Identified',
+    stopNarration: 'Stop Narration',
+    listenToSummary: 'Listen to Summary',
+    copiedLabel: 'Copied',
+    copyLabel: 'Copy',
+    executiveAiSummary: 'Executive AI Summary',
+    plainLanguageExplanation: 'Plain Language Explanation',
+    laymanGuideBadge: 'Layman Guide',
+    labValuesLabel: 'Lab Values',
+    labValuesHint: 'View color-coded normal vs abnormal values',
+    medicalTermsLabel: 'Medical Terms',
+    medicalTermsHint: 'Click any term for simple analogies',
+    doctorQuestionsLabel: 'Doctor Questions',
+    doctorQuestionsHint: 'Printable top questions for visit',
+    importantFindingsTitle: 'Important Findings',
+    safetyNotesTitle: 'Safety Notes & Guidelines',
+    generalCategory: 'General',
+    refLabel: 'Ref:',
+    viewWhyItMatters: 'View Why It Matters & Doctor Questions',
+    whatThisValueMeasures: 'What this value measures:',
+    whyItMattersHealth: 'Why it matters for your health:',
+    closeBreakdown: 'Close Breakdown',
+    lowLabel: 'Low',
+    normalLabel: 'Normal',
+    highLabel: 'High',
+    rangeLabel: 'Range:',
+    targetRange: 'Target Range',
+    yourValueLabel: 'Your Value:',
+    measuredValueLabel: 'Measured Value:',
+    whyAskLabel: 'Why ask:',
+    addLabel: 'Add',
+    keyDiscussionPoints: 'Key Discussion Points',
+    personalAppointmentNotes: 'Personal Appointment Notes',
+    historicalTrendBadge: 'Historical Trend & Multi-Report Comparison',
+    compareLabTitle: 'Compare Lab Results & Track Health Progress',
+    compareLabSubtitle: 'Compare your current report side-by-side with previous tests to spot improvements or values needing discussion',
+    compareWithLabel: 'Compare with:',
+    keyComparisonInsights: 'Key Comparison Insights',
+    comparingWord: 'Comparing',
+    againstWord: 'against',
+    previousTestLabel: 'Previous Test',
+    comparisonSummaryTail: 'lab tests evaluated, key progress trends indicate stable to positive shifts across core metabolic markers.',
+    outOfWord: 'Out of',
+    sideBySideTitle: 'Side-by-Side Lab Parameter Comparison',
+    currentValueLabel: 'Current Value',
+    previousValueLabel: 'Previous Value',
+    differenceLabel: 'Difference (Delta)',
+    trendImproved: 'Improved / Favorable',
+    trendElevated: 'Elevated / Watch',
+    trendStable: 'Stable',
+    notAvailableShort: 'N/A',
+    todayLabel: 'Today',
+    priorLabel: 'Prior',
+    printDocumentLabel: 'Document:',
+    printDisclaimer: 'Educational Disclaimer: This AI-generated summary is for educational understanding only and is not a medical diagnosis. Always consult a licensed healthcare professional.',
+    printSection1: '1. Executive Summary',
+    printSection2: '2. Patient-Friendly Explanation',
+    printSection3: '3. Extracted Lab Test Measurements',
+    printSection4: '4. Recommended Questions for Your Healthcare Visit',
+    cameraScannerSubtitle: 'Point phone camera at document & ask questions',
+    muteSpeech: 'Mute Speech Output',
+    enableSpeech: 'Enable Speech Output',
+    returnToUpload: 'Return to Upload',
+    liveCameraInsights: 'Live Camera Insights',
+    speakingLabel: 'Speaking',
+    detectedValuesInFrame: 'Detected Values in Frame:',
+    cameraAccessError: 'Unable to access camera. Please grant permission and use HTTPS.',
+    frameCaptureError: 'Failed to capture video frame.',
+    frameAnalyzeError: 'Error analyzing camera frame',
   },
   fr: {
     brandTitle: 'MediExplain',
@@ -460,6 +616,84 @@ export const translations: Record<Language, Translations> = {
     rangeCheckBadge: 'Vérification des Plages',
     doctorPrepBadge: 'Préparation Médecin',
     nonDiagnosticBadge: 'IA Non Diagnostique',
+    footerText: 'MediExplain © 2026. Assistant éducatif de rapports médicaux.',
+    viewingLabel: 'Affichage :',
+    poweredByGemini: 'Propulsé par Gemini 3.6 Flash & Vision',
+    ocrVisionBadge: 'OCR & Vision',
+    chatErrorPrefix: 'J\'ai rencontré un problème lors du traitement de votre demande :',
+    tryAgain: 'Veuillez réessayer.',
+    patientReportBadge: 'Rapport Patient',
+    reportDateLabel: 'Date du rapport :',
+    facilityLabel: 'Établissement :',
+    labTestsIdentified: 'Analyses identifiées',
+    stopNarration: 'Arrêter la lecture',
+    listenToSummary: 'Écouter le résumé',
+    copiedLabel: 'Copié',
+    copyLabel: 'Copier',
+    executiveAiSummary: 'Synthèse IA',
+    plainLanguageExplanation: 'Explication en langage simple',
+    laymanGuideBadge: 'Guide Simplifié',
+    labValuesLabel: 'Valeurs de Laboratoire',
+    labValuesHint: 'Voir les valeurs normales et anormales par code couleur',
+    medicalTermsLabel: 'Termes Médicaux',
+    medicalTermsHint: 'Cliquez sur un terme pour une analogie simple',
+    doctorQuestionsLabel: 'Questions au Médecin',
+    doctorQuestionsHint: 'Questions clés imprimables pour la consultation',
+    importantFindingsTitle: 'Constatations Importantes',
+    safetyNotesTitle: 'Consignes de Sécurité',
+    generalCategory: 'Général',
+    refLabel: 'Réf. :',
+    viewWhyItMatters: 'Voir pourquoi c\'est important & questions au médecin',
+    whatThisValueMeasures: 'Ce que cette valeur mesure :',
+    whyItMattersHealth: 'Pourquoi c\'est important pour votre santé :',
+    closeBreakdown: 'Fermer le détail',
+    lowLabel: 'Bas',
+    normalLabel: 'Normal',
+    highLabel: 'Élevé',
+    rangeLabel: 'Plage :',
+    targetRange: 'Plage Cible',
+    yourValueLabel: 'Votre valeur :',
+    measuredValueLabel: 'Valeur mesurée :',
+    whyAskLabel: 'Pourquoi demander :',
+    addLabel: 'Ajouter',
+    keyDiscussionPoints: 'Points Clés à Discuter',
+    personalAppointmentNotes: 'Notes Personnelles de Consultation',
+    historicalTrendBadge: 'Tendance historique & comparaison multi-rapports',
+    compareLabTitle: 'Comparez vos analyses et suivez votre progression',
+    compareLabSubtitle: 'Comparez votre rapport actuel avec des analyses précédentes pour repérer les améliorations ou les valeurs à discuter',
+    compareWithLabel: 'Comparer avec :',
+    keyComparisonInsights: 'Points Clés de la Comparaison',
+    comparingWord: 'Comparaison de',
+    againstWord: 'avec',
+    previousTestLabel: 'Analyse Précédente',
+    comparisonSummaryTail: 'analyses évaluées, les tendances indiquent une évolution stable à positive des principaux marqueurs métaboliques.',
+    outOfWord: 'Sur',
+    sideBySideTitle: 'Comparaison Détaillée des Paramètres',
+    currentValueLabel: 'Valeur Actuelle',
+    previousValueLabel: 'Valeur Précédente',
+    differenceLabel: 'Différence (Delta)',
+    trendImproved: 'Amélioré / Favorable',
+    trendElevated: 'Élevé / À surveiller',
+    trendStable: 'Stable',
+    notAvailableShort: 'N/D',
+    todayLabel: "Aujourd'hui",
+    priorLabel: 'Antérieur',
+    printDocumentLabel: 'Document :',
+    printDisclaimer: 'Avertissement éducatif : ce résumé généré par IA sert uniquement à la compréhension et ne constitue pas un diagnostic médical. Consultez toujours un professionnel de santé qualifié.',
+    printSection1: '1. Synthèse Générale',
+    printSection2: '2. Explication Simplifiée',
+    printSection3: '3. Mesures de Laboratoire Extraites',
+    printSection4: '4. Questions Recommandées pour Votre Consultation',
+    cameraScannerSubtitle: 'Pointez la caméra vers le document et posez vos questions',
+    muteSpeech: 'Couper la voix',
+    enableSpeech: 'Activer la voix',
+    returnToUpload: 'Retour au téléversement',
+    liveCameraInsights: 'Analyse Caméra en Direct',
+    speakingLabel: 'Lecture en cours',
+    detectedValuesInFrame: 'Valeurs détectées dans l\'image :',
+    cameraAccessError: 'Impossible d\'accéder à la caméra. Autorisez l\'accès et utilisez HTTPS.',
+    frameCaptureError: 'Échec de la capture de l\'image vidéo.',
+    frameAnalyzeError: 'Erreur lors de l\'analyse de l\'image',
   },
   ar: {
     brandTitle: 'MediExplain',
@@ -607,5 +841,83 @@ export const translations: Record<Language, Translations> = {
     rangeCheckBadge: 'فحص النطاقات',
     doctorPrepBadge: 'تحضير الطبيب',
     nonDiagnosticBadge: 'ذكاء اصطناعي غير تشخيصي',
+    footerText: 'MediExplain © 2026. مساعد تعليمي للتقارير الطبية.',
+    viewingLabel: 'المعروض:',
+    poweredByGemini: 'مدعوم بـ Gemini 3.6 Flash والرؤية الحاسوبية',
+    ocrVisionBadge: 'التعرف الضوئي والرؤية',
+    chatErrorPrefix: 'واجهت مشكلة أثناء معالجة طلبك:',
+    tryAgain: 'يرجى المحاولة مرة أخرى.',
+    patientReportBadge: 'تقرير المريض',
+    reportDateLabel: 'تاريخ التقرير:',
+    facilityLabel: 'المختبر:',
+    labTestsIdentified: 'تحاليل تم التعرف عليها',
+    stopNarration: 'إيقاف القراءة',
+    listenToSummary: 'استمع إلى الملخص',
+    copiedLabel: 'تم النسخ',
+    copyLabel: 'نسخ',
+    executiveAiSummary: 'الملخص التنفيذي بالذكاء الاصطناعي',
+    plainLanguageExplanation: 'شرح بلغة بسيطة',
+    laymanGuideBadge: 'دليل مبسط',
+    labValuesLabel: 'نتائج التحاليل',
+    labValuesHint: 'اعرض القيم الطبيعية وغير الطبيعية بالألوان',
+    medicalTermsLabel: 'المصطلحات الطبية',
+    medicalTermsHint: 'اضغط على أي مصطلح للحصول على تشبيه مبسط',
+    doctorQuestionsLabel: 'أسئلة للطبيب',
+    doctorQuestionsHint: 'أهم الأسئلة القابلة للطباعة قبل الزيارة',
+    importantFindingsTitle: 'النتائج المهمة',
+    safetyNotesTitle: 'ملاحظات وإرشادات السلامة',
+    generalCategory: 'عام',
+    refLabel: 'المرجع:',
+    viewWhyItMatters: 'اعرض أهمية النتيجة وأسئلة الطبيب',
+    whatThisValueMeasures: 'ما الذي تقيسه هذه النتيجة:',
+    whyItMattersHealth: 'لماذا تهم صحتك:',
+    closeBreakdown: 'إغلاق التفاصيل',
+    lowLabel: 'منخفض',
+    normalLabel: 'طبيعي',
+    highLabel: 'مرتفع',
+    rangeLabel: 'النطاق:',
+    targetRange: 'النطاق المستهدف',
+    yourValueLabel: 'قيمتك:',
+    measuredValueLabel: 'القيمة المقاسة:',
+    whyAskLabel: 'لماذا تسأل:',
+    addLabel: 'إضافة',
+    keyDiscussionPoints: 'نقاط النقاش الأساسية',
+    personalAppointmentNotes: 'ملاحظات شخصية للموعد',
+    historicalTrendBadge: 'التطور التاريخي ومقارنة عدة تقارير',
+    compareLabTitle: 'قارن نتائج التحاليل وتابع تطور صحتك',
+    compareLabSubtitle: 'قارن تقريرك الحالي مع التحاليل السابقة لاكتشاف التحسن أو القيم التي تحتاج مناقشة',
+    compareWithLabel: 'قارن مع:',
+    keyComparisonInsights: 'أبرز نتائج المقارنة',
+    comparingWord: 'مقارنة',
+    againstWord: 'مع',
+    previousTestLabel: 'التحليل السابق',
+    comparisonSummaryTail: 'تحليلاً تم تقييمها، وتشير المؤشرات إلى تطور مستقر أو إيجابي في المؤشرات الأيضية الأساسية.',
+    outOfWord: 'من أصل',
+    sideBySideTitle: 'مقارنة تفصيلية لمؤشرات المختبر',
+    currentValueLabel: 'القيمة الحالية',
+    previousValueLabel: 'القيمة السابقة',
+    differenceLabel: 'الفارق',
+    trendImproved: 'تحسّن / إيجابي',
+    trendElevated: 'مرتفع / يستوجب المتابعة',
+    trendStable: 'مستقر',
+    notAvailableShort: 'غير متوفر',
+    todayLabel: 'اليوم',
+    priorLabel: 'سابق',
+    printDocumentLabel: 'الملف:',
+    printDisclaimer: 'تنويه تعليمي: هذا الملخص المُولَّد بالذكاء الاصطناعي لأغراض الفهم التعليمي فقط وليس تشخيصاً طبياً. استشر دائماً مختصاً صحياً مرخصاً.',
+    printSection1: '1. الملخص التنفيذي',
+    printSection2: '2. شرح مبسط للمريض',
+    printSection3: '3. القياسات المستخرجة من التحاليل',
+    printSection4: '4. أسئلة مقترحة لزيارتك الطبية',
+    cameraScannerSubtitle: 'وجّه كاميرا هاتفك نحو المستند واطرح أسئلتك',
+    muteSpeech: 'كتم الصوت',
+    enableSpeech: 'تفعيل الصوت',
+    returnToUpload: 'العودة إلى الرفع',
+    liveCameraInsights: 'تحليلات الكاميرا المباشرة',
+    speakingLabel: 'جارٍ التحدث',
+    detectedValuesInFrame: 'القيم المكتشفة في الصورة:',
+    cameraAccessError: 'تعذّر الوصول إلى الكاميرا. يرجى منح الإذن واستخدام HTTPS.',
+    frameCaptureError: 'فشل التقاط صورة الفيديو.',
+    frameAnalyzeError: 'خطأ أثناء تحليل صورة الكاميرا',
   }
 };

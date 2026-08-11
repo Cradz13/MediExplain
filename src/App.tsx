@@ -206,7 +206,7 @@ export default function App() {
               </button>
 
               <div className="text-xs text-slate-500 dark:text-gray-400 font-medium">
-                Viewing: <strong className="text-slate-900 dark:text-white font-serif">{analysis.fileName}</strong>
+                {t.viewingLabel} <strong className="text-slate-900 dark:text-white font-serif">{analysis.fileName}</strong>
               </div>
             </div>
 
@@ -253,7 +253,7 @@ export default function App() {
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-white/10 bg-white/50 dark:bg-black/40 backdrop-blur-md py-6 text-center text-xs text-slate-500 dark:text-gray-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2">
-          <span>MediExplain &copy; 2026. Educational Medical Report Assistant.</span>
+          <span>{t.footerText}</span>
         </div>
       </footer>
 

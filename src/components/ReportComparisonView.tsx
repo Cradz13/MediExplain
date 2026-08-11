@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   GitCompare, 
   TrendingDown, 
@@ -17,7 +17,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { ReportAnalysisResult, LabValueItem } from '../types';
-import { SAMPLE_REPORTS, SampleReport } from '../data/sampleReports';
+import { getSampleReports, SampleReport } from '../data/sampleReports';
 import { Language, translations } from '../utils/i18n';
 
 interface ReportComparisonViewProps {
@@ -31,11 +31,27 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
 }) => {
   const t = translations[language];
 
+  // Sample reports follow the active UI language
+  const sampleReports = useMemo(() => getSampleReports(language as Language), [language]);
+
   // Pick a comparison report (defaults to second sample report if available)
-  const availableSamples = SAMPLE_REPORTS.filter((s) => s.analysis.id !== currentAnalysis.id);
-  const [selectedComparisonSample, setSelectedComparisonSample] = useState<SampleReport | null>(
-    availableSamples[0] || SAMPLE_REPORTS[0]
+  const availableSamples = sampleReports.filter((s) => s.analysis.id !== currentAnalysis.id);
+  const [selectedComparisonSampleId, setSelectedComparisonSampleId] = useState<string>(
+    (availableSamples[0] || sampleReports[0])?.id || ''
   );
+
+  const selectedComparisonSample: SampleReport | null =
+    sampleReports.find((s) => s.id === selectedComparisonSampleId) ||
+    availableSamples[0] ||
+    sampleReports[0] ||
+    null;
+
+  // Keep the selection valid if the language (and therefore the list) changes
+  useEffect(() => {
+    if (!sampleReports.some((s) => s.id === selectedComparisonSampleId)) {
+      setSelectedComparisonSampleId((availableSamples[0] || sampleReports[0])?.id || '');
+    }
+  }, [sampleReports]);
 
   const comparisonAnalysis = selectedComparisonSample?.analysis;
 
@@ -49,7 +65,7 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
     const prevNum = prev ? parseFloat(prev.value.replace(/[^0-9.]/g, '')) : NaN;
 
     let delta: number | null = null;
-    let deltaStr = 'N/A';
+    let deltaStr = t.notAvailableShort;
     let trend: 'improved' | 'elevated' | 'same' | 'unknown' = 'unknown';
 
     if (!isNaN(currNum) && !isNaN(prevNum)) {
@@ -90,28 +106,25 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-semibold mb-2">
               <GitCompare className="w-3.5 h-3.5" />
-              <span>Historical Trend & Multi-Report Comparison</span>
+              <span>{t.historicalTrendBadge}</span>
             </div>
             <h2 className="text-2xl font-serif text-slate-900 dark:text-white">
-              Compare Lab Results & Track Health Progress
+              {t.compareLabTitle}
             </h2>
             <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
-              Compare your current report side-by-side with previous tests to spot improvements or values needing discussion
+              {t.compareLabSubtitle}
             </p>
           </div>
 
           {/* Select Comparison Benchmark */}
           <div className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 p-2 rounded-2xl border border-slate-200 dark:border-white/10 w-full md:w-auto">
-            <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 pl-2 shrink-0">Compare with:</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 pl-2 shrink-0">{t.compareWithLabel}</span>
             <select
               value={selectedComparisonSample?.id || ''}
-              onChange={(e) => {
-                const found = SAMPLE_REPORTS.find((s) => s.id === e.target.value);
-                if (found) setSelectedComparisonSample(found);
-              }}
+              onChange={(e) => setSelectedComparisonSampleId(e.target.value)}
               className="bg-white dark:bg-[#18181b] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
             >
-              {SAMPLE_REPORTS.map((sample) => (
+              {sampleReports.map((sample) => (
                 <option key={sample.id} value={sample.id}>
                   {sample.title} ({sample.date})
                 </option>
@@ -123,10 +136,10 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
         {/* AI Health Progress Summary Box */}
         <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-900/20 to-indigo-900/20 dark:bg-white/[0.03] border border-blue-500/30 dark:border-white/10 space-y-2">
           <div className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
-            <Sparkles className="w-4 h-4 text-blue-500" /> Key Comparison Insights
+            <Sparkles className="w-4 h-4 text-blue-500" /> {t.keyComparisonInsights}
           </div>
           <p className="text-xs sm:text-sm text-slate-800 dark:text-gray-200 leading-relaxed font-sans">
-            Comparing <strong className="text-blue-600 dark:text-blue-400">{currentAnalysis.fileName}</strong> against <strong className="text-indigo-600 dark:text-indigo-400">{comparisonAnalysis?.fileName || 'Previous Test'}</strong>. Out of {matchedValues.length} lab tests evaluated, key progress trends indicate stable to positive shifts across core metabolic markers.
+            {t.comparingWord} <strong className="text-blue-600 dark:text-blue-400">{currentAnalysis.fileName}</strong> {t.againstWord} <strong className="text-indigo-600 dark:text-indigo-400">{comparisonAnalysis?.fileName || t.previousTestLabel}</strong>. {t.outOfWord} {matchedValues.length} {t.comparisonSummaryTail}
           </p>
         </div>
       </div>
@@ -134,7 +147,7 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
       {/* Side-by-Side Comparison Cards / Table */}
       <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 font-serif">
-          <FileSpreadsheet className="w-5 h-5 text-blue-500" /> Side-by-Side Lab Parameter Comparison
+          <FileSpreadsheet className="w-5 h-5 text-blue-500" /> {t.sideBySideTitle}
         </h3>
 
         <div className="overflow-x-auto">
@@ -142,9 +155,9 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
             <thead>
               <tr className="border-b border-slate-200 dark:border-white/10 text-slate-400 dark:text-gray-500 uppercase tracking-wider text-[10px] font-bold">
                 <th className="py-3 px-4">{t.thLabParameter}</th>
-                <th className="py-3 px-4">Current Value ({currentAnalysis.patientInfo?.date || 'Today'})</th>
-                <th className="py-3 px-4">Previous Value ({comparisonAnalysis?.patientInfo?.date || 'Prior'})</th>
-                <th className="py-3 px-4">Difference (Delta)</th>
+                <th className="py-3 px-4">{t.currentValueLabel} ({currentAnalysis.patientInfo?.date || t.todayLabel})</th>
+                <th className="py-3 px-4">{t.previousValueLabel} ({comparisonAnalysis?.patientInfo?.date || t.priorLabel})</th>
+                <th className="py-3 px-4">{t.differenceLabel}</th>
                 <th className="py-3 px-4">{t.thProgressTrend}</th>
               </tr>
             </thead>
@@ -153,7 +166,7 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
                 <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-colors">
                   <td className="py-4 px-4 font-semibold text-slate-900 dark:text-white">
                     <div>{item.current.name}</div>
-                    <span className="text-[10px] text-slate-400 dark:text-gray-500 font-normal">Ref: {item.current.referenceRange} {item.current.unit}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-gray-500 font-normal">{t.refLabel} {item.current.referenceRange} {item.current.unit}</span>
                   </td>
                   
                   {/* Current Value */}
@@ -163,7 +176,7 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
 
                   {/* Previous Value */}
                   <td className="py-4 px-4 font-mono text-slate-600 dark:text-gray-400">
-                    {item.previous ? `${item.previous.value} ${item.previous.unit}` : 'N/A'}
+                    {item.previous ? `${item.previous.value} ${item.previous.unit}` : t.notAvailableShort}
                   </td>
 
                   {/* Delta */}
@@ -175,17 +188,17 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
                   <td className="py-4 px-4">
                     {item.trend === 'improved' && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        <TrendingDown className="w-3.5 h-3.5" /> Improved / Favorable
+                        <TrendingDown className="w-3.5 h-3.5" /> {t.trendImproved}
                       </span>
                     )}
                     {item.trend === 'elevated' && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                        <TrendingUp className="w-3.5 h-3.5" /> Elevated / Watch
+                        <TrendingUp className="w-3.5 h-3.5" /> {t.trendElevated}
                       </span>
                     )}
                     {item.trend === 'same' && (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-white/10">
-                        <Minus className="w-3.5 h-3.5" /> Stable
+                        <Minus className="w-3.5 h-3.5" /> {t.trendStable}
                       </span>
                     )}
                     {item.trend === 'unknown' && (

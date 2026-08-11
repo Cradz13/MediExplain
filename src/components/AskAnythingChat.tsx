@@ -19,6 +19,7 @@ import {
 import { ReportAnalysisResult, ChatMessage } from '../types';
 import { sendChatMessage } from '../services/api';
 import { Language, translations } from '../utils/i18n';
+import { speak, cancelSpeech, isSpeechSupported } from '../utils/speech';
 
 interface AskAnythingChatProps {
   reportContext: ReportAnalysisResult | null;
@@ -99,7 +100,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
       const errorMsg: ChatMessage = {
         id: `err-${Date.now()}`,
         sender: 'ai',
-        text: `I encountered an issue processing your request: ${err.message || 'Please try again.'}`,
+        text: `${t.chatErrorPrefix} ${err.message || t.tryAgain}`,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -109,22 +110,19 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
   };
 
   const speakMessage = (msgId: string, text: string) => {
-    if (!window.speechSynthesis) return;
+    if (!isSpeechSupported()) return;
 
     if (speakingMsgId === msgId) {
-      window.speechSynthesis.cancel();
+      cancelSpeech();
       setSpeakingMsgId(null);
       return;
     }
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.onstart = () => setSpeakingMsgId(msgId);
-    utterance.onend = () => setSpeakingMsgId(null);
-    utterance.onerror = () => setSpeakingMsgId(null);
-
-    window.speechSynthesis.speak(utterance);
+    speak(text, language, {
+      onStart: () => setSpeakingMsgId(msgId),
+      onEnd: () => setSpeakingMsgId(null),
+      onError: () => setSpeakingMsgId(null),
+    });
   };
 
   return (
@@ -134,8 +132,8 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
       <div className="bg-slate-100 dark:bg-white/[0.03] rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-white/10 flex items-center gap-3.5 text-xs text-slate-600 dark:text-gray-300 backdrop-blur-md">
         <ShieldAlert className="w-5 h-5 text-blue-500 shrink-0" />
         <span>
-          <strong className="font-semibold text-slate-900 dark:text-white">Educational AI Assistant: </strong>
-          Answers are generated based solely on your uploaded report. This tool does not provide medical diagnosis, prescription advice, or treatment plans. Always consult your doctor.
+          <strong className="font-semibold text-slate-900 dark:text-white">{t.chatSafetyBannerTitle}: </strong>
+          {t.chatSafetyBannerText}
         </span>
       </div>
 
@@ -181,11 +179,11 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
                   >
                     {speakingMsgId === msg.id ? (
                       <>
-                        <VolumeX className="w-3.5 h-3.5 animate-pulse" /> Stop Audio
+                        <VolumeX className="w-3.5 h-3.5 animate-pulse" /> {t.stopAudio}
                       </>
                     ) : (
                       <>
-                        <Volume2 className="w-3.5 h-3.5" /> Listen
+                        <Volume2 className="w-3.5 h-3.5" /> {t.listenAudio}
                       </>
                     )}
                   </button>
@@ -209,7 +207,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
         {/* Quick Prompts Bar */}
         <div className="px-4 py-2.5 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center gap-2 overflow-x-auto no-scrollbar">
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-gray-500 shrink-0 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Suggested:
+            <Sparkles className="w-3.5 h-3.5 text-blue-500" /> {t.suggestedPrompts}
           </span>
           {QUICK_PROMPTS.map((prompt, idx) => (
             <button

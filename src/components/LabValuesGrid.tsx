@@ -150,7 +150,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-gray-500">
-                    {item.category || 'General'}
+                    {item.category || t.generalCategory}
                   </span>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {item.name}
@@ -168,7 +168,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                   {item.unit}
                 </span>
                 <span className="text-xs text-slate-400 dark:text-gray-500 ml-auto font-mono">
-                  Ref: <strong className="text-slate-700 dark:text-gray-300">{item.referenceRange}</strong>
+                  {t.refLabel} <strong className="text-slate-700 dark:text-gray-300">{item.referenceRange}</strong>
                 </span>
               </div>
 
@@ -184,13 +184,13 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
 
               {/* Explanatory summary preview */}
               <p className="text-xs text-slate-600 dark:text-gray-300 line-clamp-2 leading-relaxed font-sans">
-                <strong>What it measures:</strong> {item.whatItMeasures}
+                <strong>{t.whatItMeasures}</strong> {item.whatItMeasures}
               </p>
             </div>
 
             {/* Questions to ask Doctor Preview */}
             <div className="pt-3 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-xs text-blue-600 dark:text-blue-400 font-semibold group-hover:translate-x-1 transition-transform">
-              <span>View Why It Matters & Doctor Questions</span>
+              <span>{t.viewWhyItMatters}</span>
               <ChevronRight className="w-4 h-4" />
             </div>
           </div>
@@ -251,7 +251,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
             <div className="space-y-1.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 flex items-center gap-1.5">
                 <Info className="w-4 h-4 text-blue-500" />
-                What this value measures:
+                {t.whatThisValueMeasures}
               </h4>
               <p className="text-xs text-slate-700 dark:text-gray-300 leading-relaxed bg-blue-50/50 dark:bg-blue-500/10 p-3.5 rounded-2xl border border-blue-100 dark:border-blue-500/20">
                 {activeModalItem.whatItMeasures}
@@ -262,7 +262,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
             <div className="space-y-1.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-indigo-500" />
-                Why it matters for your health:
+                {t.whyItMattersHealth}
               </h4>
               <p className="text-xs text-slate-700 dark:text-gray-300 leading-relaxed bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200 dark:border-white/10">
                 {activeModalItem.whyItMatters}
@@ -273,7 +273,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
             <div className="space-y-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 flex items-center gap-1.5">
                 <QuestionIcon className="w-4 h-4 text-amber-500" />
-                Questions to ask your doctor:
+                {t.questionsToAskDoctor}
               </h4>
               <ul className="space-y-2">
                 {activeModalItem.questionsToAsk.map((q, idx) => (
@@ -291,7 +291,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 onClick={() => setActiveModalItem(null)}
                 className="w-full py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)]"
               >
-                Close Breakdown
+                {t.closeBreakdown}
               </button>
             </div>
 

@@ -126,7 +126,7 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
                     </h3>
                     {isFromReport && (
                       <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                        From Report
+                        {t.fromReportBadge}
                       </span>
                     )}
                   </div>
@@ -141,7 +141,7 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
               {/* Definition */}
               <div className="space-y-1 text-xs">
                 <span className="font-bold text-slate-500 dark:text-gray-400 uppercase tracking-wider text-[10px] block">
-                  Definition
+                  {t.definitionLabel}
                 </span>
                 <p className="text-slate-700 dark:text-gray-300 leading-relaxed font-medium">
                   {item.definition}
@@ -152,7 +152,7 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
               {item.analogy && (
                 <div className="bg-blue-50/60 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 p-4 rounded-2xl text-xs space-y-1 text-blue-900 dark:text-blue-300">
                   <div className="flex items-center gap-1.5 font-bold text-blue-700 dark:text-blue-400 uppercase text-[10px] tracking-wider">
-                    <Lightbulb className="w-3.5 h-3.5" /> Everyday Analogy
+                    <Lightbulb className="w-3.5 h-3.5" /> {t.everydayAnalogy}
                   </div>
                   <p className="leading-relaxed font-medium text-slate-800 dark:text-gray-200">
                     "{item.analogy}"

@@ -5,7 +5,6 @@
 
 import React, { useState } from 'react';
 import { 
-  Stethoscope, 
   Camera, 
   Printer, 
   FileText, 
@@ -20,6 +19,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { getSampleReports, SampleReport } from '../data/sampleReports';
+import { BrandLogo } from './BrandLogo';
 import { Language, translations } from '../utils/i18n';
 import { LanguageSwitcher } from './LanguageSwitcher';
 
@@ -69,9 +69,7 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Logo & Brand */}
           <div className="flex items-center gap-3.5 shrink-0 cursor-pointer" onClick={() => setActiveTab('summary')}>
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white glow-blue shadow-[0_0_20px_rgba(37,99,235,0.4)] shrink-0">
-              <Stethoscope className="w-5 h-5" />
-            </div>
+            <BrandLogo className="w-10 h-10" iconClassName="w-5 h-5" alt={t.brandTitle} />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-serif text-xl font-bold tracking-tight text-slate-900 dark:text-white">
