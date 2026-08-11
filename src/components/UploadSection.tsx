@@ -13,7 +13,10 @@ import {
   CheckCircle2, 
   Loader2, 
   AlertCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Shield,
+  Languages,
+  MessageCircle
 } from 'lucide-react';
 import { getSampleReports, SampleReport } from '../data/sampleReports';
 import { UPLOAD_ACCEPT_ATTRIBUTE } from '../utils/fileProcessing';
@@ -97,54 +100,79 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
     fileInputRef.current?.click();
   };
 
+  const featurePills = [
+    { icon: Shield, label: t.ocrVisionBadge },
+    { icon: CheckCircle2, label: t.rangeCheckBadge },
+    { icon: MessageCircle, label: t.doctorPrepBadge },
+    { icon: Languages, label: 'EN · FR · AR' },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-6 px-4">
+    <div className="max-w-5xl mx-auto space-y-10 py-4 sm:py-8 px-1 animate-fade-up">
       
       {/* Hero Welcome Section */}
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+      <div className="text-center space-y-5 relative">
+        <div className="absolute inset-x-0 -top-8 h-40 bg-gradient-to-b from-cyan-400/10 via-indigo-400/5 to-transparent blur-3xl pointer-events-none" />
+        
+        <div className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-50/90 dark:bg-cyan-500/10 border border-cyan-200/70 dark:border-cyan-500/25 text-cyan-700 dark:text-cyan-300 text-xs font-semibold shadow-sm">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           <span>{t.poweredByGemini}</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-serif text-slate-900 dark:text-white tracking-tight leading-tight">
-          {t.heroTitle}
+        
+        <h1 className="relative text-4xl sm:text-5xl lg:text-[3.25rem] font-display font-semibold text-slate-900 dark:text-white tracking-tight leading-[1.15] max-w-3xl mx-auto">
+          <span className="text-gradient">{t.heroTitle}</span>
         </h1>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        
+        <p className="relative text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
           {t.heroSubtitle}
         </p>
+
+        {/* Feature chips under hero */}
+        <div className="relative flex flex-wrap items-center justify-center gap-2 pt-1">
+          {featurePills.map(({ icon: Icon, label }) => (
+            <span
+              key={label}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 backdrop-blur-sm"
+            >
+              <Icon className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Main Upload Dropzone / Processing Box */}
       {isAnalyzing ? (
-        <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-10 sm:p-14 border border-blue-500/30 shadow-2xl text-center space-y-6 backdrop-blur-md">
-          <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border-4 border-blue-500/30 animate-ping opacity-75"></div>
-            <div className="w-16 h-16 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+        <div className="relative overflow-hidden card-elevated rounded-[1.75rem] p-10 sm:p-14 text-center space-y-7">
+          <div className="absolute inset-0 shimmer opacity-60 pointer-events-none" />
+          
+          <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-2 border-cyan-400/40 animate-pulse-ring" />
+            <div className="absolute inset-2 rounded-full border border-cyan-500/20" />
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/15 to-indigo-500/15 text-cyan-500 dark:text-cyan-400 flex items-center justify-center border border-cyan-500/25 shadow-inner">
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
           </div>
-          <div className="space-y-2">
-            <h3 className="text-2xl font-serif text-slate-900 dark:text-white">
+          
+          <div className="relative space-y-2">
+            <h3 className="text-2xl font-display font-semibold text-slate-900 dark:text-white">
               {t.analyzingReportTitle}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 max-w-md mx-auto">
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
               {analyzingStep || t.analyzingReportStep}
             </p>
           </div>
           
-          <div className="max-w-md mx-auto grid grid-cols-3 gap-2 pt-2 text-xs">
-            <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.ocrVisionBadge}</span>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.rangeCheckBadge}</span>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.doctorPrepBadge}</span>
-            </div>
+          <div className="relative max-w-lg mx-auto grid grid-cols-3 gap-2.5 pt-1 text-xs">
+            {[t.ocrVisionBadge, t.rangeCheckBadge, t.doctorPrepBadge].map((label) => (
+              <div
+                key={label}
+                className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50/80 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                <span className="truncate">{label}</span>
+              </div>
+            ))}
           </div>
         </div>
       ) : (
@@ -163,12 +191,16 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
               openFilePicker();
             }
           }}
-          className={`relative bg-white dark:bg-white/[0.03] rounded-3xl p-8 sm:p-12 border-2 border-dashed transition-all cursor-pointer shadow-xl group ${
+          className={`relative overflow-hidden rounded-[1.75rem] p-8 sm:p-12 border-2 border-dashed transition-all cursor-pointer group ${
             isDragging
-              ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-500/10 scale-[1.01]'
-              : 'border-slate-300 dark:border-white/10 hover:border-blue-500/50'
+              ? 'border-cyan-500 bg-cyan-50/70 dark:bg-cyan-500/10 scale-[1.01] shadow-[0_0_0_4px_rgba(6,182,212,0.12)]'
+              : 'card-elevated border-slate-300/90 dark:border-white/12 hover:border-cyan-500/50'
           }`}
         >
+          {/* Decorative corner accents */}
+          <div className="absolute top-0 end-0 w-40 h-40 bg-gradient-to-bl from-cyan-400/10 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 start-0 w-32 h-32 bg-gradient-to-tr from-indigo-400/8 to-transparent pointer-events-none" />
+
           <input
             type="file"
             ref={fileInputRef}
@@ -177,28 +209,28 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
             className="hidden"
           />
 
-          <div className="flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="relative flex flex-col items-center justify-center text-center space-y-5">
+            <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-gradient-to-br from-cyan-500/15 via-cyan-500/10 to-indigo-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200/70 dark:border-cyan-500/25 flex items-center justify-center group-hover:scale-110 group-hover:shadow-[0_12px_32px_-8px_rgba(6,182,212,0.45)] transition-all duration-300">
               <FileUp className="w-8 h-8" />
             </div>
 
-            <div className="space-y-1">
-              <p className="text-base font-semibold text-slate-900 dark:text-white">
+            <div className="space-y-1.5">
+              <p className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white">
                 {t.dragDropPrompt}
               </p>
-              <p className="text-xs text-slate-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {t.supportedFormats}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   openFilePicker();
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 transition-all glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold btn-primary"
               >
                 <Upload className="w-4 h-4" />
                 {t.uploadPdfBtn}
@@ -210,9 +242,9 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
                   e.stopPropagation();
                   onOpenLiveCamera();
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold text-slate-800 dark:text-gray-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border border-slate-200 dark:border-white/10"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold btn-secondary"
               >
-                <Camera className="w-4 h-4 text-blue-500" />
+                <Camera className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                 {t.takePhotoBtn}
               </button>
             </div>
@@ -222,41 +254,47 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
 
       {/* Error Message Notice */}
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-300 text-xs flex items-center gap-3">
-          <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-          <span>{errorMessage}</span>
+        <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 text-red-700 dark:text-red-300 text-xs flex items-center gap-3 shadow-sm">
+          <div className="p-2 rounded-xl bg-red-500/10 border border-red-500/20 shrink-0">
+            <AlertCircle className="w-4 h-4 text-red-500" />
+          </div>
+          <span className="leading-relaxed">{errorMessage}</span>
         </div>
       )}
 
       {/* Sample Reports Bar for instant testing */}
-      <div className="space-y-3 pt-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-2">
-            <FileSpreadsheet className="w-4 h-4 text-blue-500" />
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+              <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+            </span>
             {t.demoReportsTitle}
           </h2>
+          <div className="h-px flex-1 bg-gradient-to-r from-slate-200 dark:from-white/10 to-transparent ms-3 hidden sm:block" />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {getSampleReports(language).map((sample) => (
+          {getSampleReports(language).map((sample, index) => (
             <div
               key={sample.id}
               onClick={() => onSelectSample(sample)}
-              className="bg-white dark:bg-white/[0.03] rounded-3xl p-5 border border-slate-200 dark:border-white/10 hover:border-blue-500/40 transition-all cursor-pointer shadow-sm hover:shadow-md flex items-start gap-4 group"
+              className="card-elevated rounded-3xl p-5 hover:border-cyan-500/40 transition-all cursor-pointer flex items-start gap-4 group"
+              style={{ animationDelay: `${index * 60}ms` }}
             >
-              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-cyan-500/15 to-indigo-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-200/60 dark:border-cyan-500/20 group-hover:scale-105 group-hover:shadow-[0_8px_20px_-6px_rgba(6,182,212,0.4)] transition-all shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
-              <div className="space-y-1 overflow-hidden">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-blue-500 transition-colors truncate">
+              <div className="space-y-1.5 overflow-hidden flex-1">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors truncate">
                   {sample.title}
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-gray-400 line-clamp-2">
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                   {sample.subtitle}
                 </p>
-                <div className="pt-1 flex items-center gap-2 text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
+                <div className="pt-1 flex items-center gap-2 text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold group-hover:gap-3 transition-all">
                   <span>{t.viewSampleReport}</span>
-                  <span>&rarr;</span>
+                  <span className="rtl:rotate-180">&rarr;</span>
                 </div>
               </div>
             </div>

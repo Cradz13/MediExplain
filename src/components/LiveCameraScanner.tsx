@@ -201,18 +201,18 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-lg flex flex-col justify-between overflow-hidden animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 bg-[#050a12]/97 backdrop-blur-xl flex flex-col justify-between overflow-hidden animate-fade-up">
       
       {/* Top Controls Bar */}
-      <div className="p-4 flex items-center justify-between text-white border-b border-slate-800 bg-slate-900/80 z-10">
+      <div className="p-4 flex items-center justify-between text-white border-b border-white/10 bg-slate-950/70 backdrop-blur-xl z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center text-white shadow-[0_8px_20px_-6px_rgba(6,182,212,0.55)]">
             <Camera className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
+            <h2 className="text-sm font-bold text-white flex items-center gap-1.5 font-display">
               {t.liveCameraScanner}
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
             </h2>
             <p className="text-[11px] text-slate-400">{t.cameraScannerSubtitle}</p>
           </div>
@@ -226,10 +226,10 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
               if (isSpeaking) cancelSpeech();
               setSpeechEnabled(!speechEnabled);
             }}
-            className={`p-2 rounded-lg border transition-colors ${
+            className={`p-2.5 rounded-xl border transition-colors ${
               speechEnabled
-                ? 'bg-blue-600/30 border-blue-500 text-blue-300'
-                : 'bg-slate-800 border-slate-700 text-slate-400'
+                ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300'
+                : 'bg-white/5 border-white/10 text-slate-400'
             }`}
             title={speechEnabled ? t.muteSpeech : t.enableSpeech}
           >
@@ -243,7 +243,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
               if (stream) stream.getTracks().forEach((t) => t.stop());
               onClose();
             }}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
+            className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -277,24 +277,24 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             />
 
             {/* Bounding Scanner Frame Overlay */}
-            <div className="absolute inset-8 sm:inset-16 border-2 border-blue-500/40 rounded-2xl pointer-events-none flex flex-col justify-between p-4">
+            <div className="absolute inset-8 sm:inset-16 border border-cyan-400/30 rounded-2xl pointer-events-none flex flex-col justify-between p-4 shadow-[inset_0_0_40px_rgba(6,182,212,0.08)]">
               <div className="flex justify-between">
-                <div className="w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg"></div>
-                <div className="w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg"></div>
+                <div className="w-8 h-8 border-t-4 border-s-4 border-cyan-400 rounded-ss-lg shadow-[0_0_12px_rgba(34,211,238,0.5)]"></div>
+                <div className="w-8 h-8 border-t-4 border-e-4 border-cyan-400 rounded-se-lg shadow-[0_0_12px_rgba(34,211,238,0.5)]"></div>
               </div>
               
               {isAnalyzingFrame && (
-                <div className="text-center space-y-2 py-4 bg-slate-900/80 backdrop-blur rounded-xl border border-blue-500/50 p-4 animate-pulse">
-                  <Loader2 className="w-6 h-6 text-blue-400 animate-spin mx-auto" />
-                  <p className="text-xs font-semibold text-blue-300">
+                <div className="text-center space-y-2 py-4 bg-slate-950/85 backdrop-blur-md rounded-2xl border border-cyan-400/40 p-4">
+                  <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mx-auto" />
+                  <p className="text-xs font-semibold text-cyan-200">
                     {t.analyzingFrame}
                   </p>
                 </div>
               )}
 
               <div className="flex justify-between">
-                <div className="w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg"></div>
-                <div className="w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg"></div>
+                <div className="w-8 h-8 border-b-4 border-s-4 border-cyan-400 rounded-es-lg shadow-[0_0_12px_rgba(34,211,238,0.5)]"></div>
+                <div className="w-8 h-8 border-b-4 border-e-4 border-cyan-400 rounded-ee-lg shadow-[0_0_12px_rgba(34,211,238,0.5)]"></div>
               </div>
             </div>
           </div>
@@ -302,13 +302,13 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
 
         {/* Live Analysis Overlay Box */}
         {liveAnalysis && (
-          <div className="absolute top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl p-4 text-white space-y-3 shadow-2xl z-20">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+          <div className="absolute top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md bg-slate-950/90 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-white space-y-3 shadow-2xl z-20">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2">
+              <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" /> {t.liveCameraInsights}
               </span>
               {isSpeaking && (
-                <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-[10px] bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 px-2 py-0.5 rounded-full flex items-center gap-1">
                   <Volume2 className="w-3 h-3 animate-pulse" /> {t.speakingLabel}
                 </span>
               )}
@@ -346,12 +346,12 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
       </div>
 
       {/* Bottom Controls & Preset Questions */}
-      <div className="bg-[#050505] border-t border-white/10 p-4 space-y-3 z-10">
+      <div className="bg-[#050a12]/95 border-t border-white/10 p-4 space-y-3 z-10 backdrop-blur-xl">
         
         {/* Preset Question Pills */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-          <span className="text-xs text-gray-400 font-semibold shrink-0 flex items-center gap-1">
-            <HelpCircle className="w-3.5 h-3.5 text-blue-400" /> {t.presetsLabel}
+          <span className="text-xs text-slate-400 font-semibold shrink-0 flex items-center gap-1">
+            <HelpCircle className="w-3.5 h-3.5 text-cyan-400" /> {t.presetsLabel}
           </span>
           {PRESET_QUESTIONS.map((q, idx) => (
             <button
@@ -362,7 +362,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
                 setCustomQuery(q);
                 handleScanQuestion(q);
               }}
-              className="px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-200 bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 border border-white/10 transition-colors whitespace-nowrap"
+              className="px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-200 bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-200 border border-white/10 transition-colors whitespace-nowrap"
             >
               {q}
             </button>
@@ -377,14 +377,14 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             onChange={(e) => setCustomQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleScanQuestion()}
             placeholder={t.cameraInputPlaceholder}
-            className="flex-1 bg-white/5 border border-white/10 text-white text-xs rounded-full px-5 py-3 focus:outline-none focus:border-blue-500 placeholder-gray-500"
+            className="flex-1 bg-white/5 border border-white/10 text-white text-xs rounded-full px-5 py-3 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 placeholder-slate-500"
           />
 
           <button
             type="button"
             disabled={isAnalyzingFrame}
             onClick={() => handleScanQuestion()}
-            className="px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)] disabled:opacity-50"
+            className="px-5 py-3 rounded-full btn-primary text-xs font-semibold flex items-center gap-1.5 shrink-0 disabled:opacity-50"
           >
             <Scan className="w-4 h-4" />
             <span>{t.analyzeFrameBtn}</span>
@@ -393,7 +393,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
           <button
             type="button"
             onClick={handleCaptureFullReport}
-            className="px-5 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-lg shadow-emerald-600/20"
+            className="px-5 py-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 hover:brightness-110 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all shadow-lg shadow-emerald-600/25"
           >
             <FileCheck2 className="w-4 h-4" />
             <span>{t.processFullReportBtn}</span>

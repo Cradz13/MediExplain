@@ -18,7 +18,9 @@ import {
   Heart,
   Copy,
   Check,
-  MessageSquare
+  MessageSquare,
+  BookOpen,
+  ClipboardList
 } from 'lucide-react';
 import { ReportAnalysisResult } from '../types';
 import { Language, translations } from '../utils/i18n';
@@ -75,39 +77,44 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-fade-up">
       
       {/* Patient & Report Metadata Header Card */}
-      <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3.5 rounded-2xl bg-blue-600 text-white shrink-0 glow-blue shadow-[0_0_20px_rgba(37,99,235,0.4)]">
+      <div className="relative overflow-hidden card-elevated rounded-[1.75rem] p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="absolute top-0 end-0 w-56 h-56 bg-gradient-to-bl from-cyan-400/10 to-transparent pointer-events-none" />
+        
+        <div className="relative flex items-start gap-4">
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-600 text-white shrink-0 shadow-[0_10px_28px_-6px_rgba(6,182,212,0.55)] ring-1 ring-white/20">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl sm:text-3xl font-serif font-light text-slate-900 dark:text-white">
-                {analysis.patientInfo?.reportType || analysis.fileName} <span className="text-blue-600 dark:text-blue-400 font-serif italic text-xl">{t.analyzedPanel}</span>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h2 className="text-2xl sm:text-3xl font-display font-semibold text-slate-900 dark:text-white tracking-tight">
+                {analysis.patientInfo?.reportType || analysis.fileName}{' '}
+                <span className="text-cyan-600 dark:text-cyan-400 font-display italic font-medium text-xl">
+                  {t.analyzedPanel}
+                </span>
               </h2>
-              <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shrink-0">
+              <span className="bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-400/25 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-[0.12em] shrink-0">
                 {t.patientReportBadge}
               </span>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-gray-400 mt-2">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400 mt-2.5">
               {analysis.patientInfo?.date && (
-                <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/8">
+                  <Calendar className="w-3.5 h-3.5 text-cyan-500" />
                   {t.reportDateLabel} {analysis.patientInfo.date}
                 </span>
               )}
               {analysis.patientInfo?.laboratory && (
-                <span className="flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-blue-500" />
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/8">
+                  <Building2 className="w-3.5 h-3.5 text-cyan-500" />
                   {t.facilityLabel} {analysis.patientInfo.laboratory}
                 </span>
               )}
-              <span className="flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-blue-500" />
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/8">
+                <Activity className="w-3.5 h-3.5 text-cyan-500" />
                 {labValues.length} {t.labTestsIdentified}
               </span>
             </div>
@@ -115,26 +122,26 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
         </div>
 
         {/* Header Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0 self-end md:self-auto">
+        <div className="relative flex items-center gap-2.5 shrink-0 self-end md:self-auto">
           <button
             type="button"
             onClick={toggleAudioNarration}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-all ${
               isPlayingAudio
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md animate-pulse glow-blue'
-                : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10'
+                ? 'btn-primary border-transparent animate-pulse'
+                : 'btn-secondary'
             }`}
           >
-            {isPlayingAudio ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+            {isPlayingAudio ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />}
             <span>{isPlayingAudio ? t.stopNarration : t.listenToSummary}</span>
           </button>
 
           <button
             type="button"
             onClick={copySummaryToClipboard}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold btn-secondary"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-500 dark:text-gray-400" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />}
             <span>{copied ? t.copiedLabel : t.copyLabel}</span>
           </button>
         </div>
@@ -147,28 +154,34 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
         <div className="lg:col-span-2 space-y-6">
           
           {/* Executive Short Summary Box */}
-          <div className="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 dark:bg-white/[0.04] border border-blue-500/30 dark:border-white/10 rounded-3xl p-6 sm:p-8 space-y-3 backdrop-blur-md">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">
-              <Sparkles className="w-4 h-4" /> {t.executiveAiSummary}
+          <div className="relative overflow-hidden rounded-[1.75rem] p-6 sm:p-8 space-y-3 border border-cyan-500/25 dark:border-cyan-400/20 bg-gradient-to-br from-cyan-50/90 via-white to-indigo-50/60 dark:from-cyan-950/40 dark:via-slate-900/40 dark:to-indigo-950/30">
+            <div className="absolute -top-10 -end-10 w-40 h-40 rounded-full bg-cyan-400/15 blur-3xl pointer-events-none" />
+            <div className="relative flex items-center gap-2 text-cyan-700 dark:text-cyan-300 text-xs font-bold uppercase tracking-[0.14em]">
+              <span className="p-1.5 rounded-lg bg-cyan-500/15 border border-cyan-500/20">
+                <Sparkles className="w-3.5 h-3.5" />
+              </span>
+              {t.executiveAiSummary}
             </div>
-            <p className="text-base sm:text-lg font-sans leading-relaxed text-slate-900 dark:text-white">
-              "{analysis.shortSummary}"
+            <p className="relative text-base sm:text-lg font-body leading-relaxed text-slate-900 dark:text-white">
+              &ldquo;{analysis.shortSummary}&rdquo;
             </p>
           </div>
 
           {/* Easy Non-Medical Explanation Card */}
-          <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-serif text-slate-900 dark:text-white flex items-center gap-2">
-                <Heart className="w-5 h-5 text-rose-500" />
+          <div className="card-elevated rounded-[1.75rem] p-6 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-xl font-display font-semibold text-slate-900 dark:text-white flex items-center gap-2.5">
+                <span className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500">
+                  <Heart className="w-4 h-4" />
+                </span>
                 {t.plainLanguageExplanation}
               </h3>
-              <span className="text-[10px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.14em] shrink-0">
                 {t.laymanGuideBadge}
               </span>
             </div>
 
-            <p className="text-sm text-slate-700 dark:text-gray-300 leading-relaxed font-sans">
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-body">
               {analysis.laymanExplanation}
             </p>
           </div>
@@ -178,13 +191,18 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             <button
               type="button"
               onClick={() => onNavigateTab('labs')}
-              className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
+              className="card-elevated p-5 rounded-2xl hover:border-cyan-500/45 transition-all text-start space-y-2 group"
             >
-              <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.labValuesLabel} ({labValues.length})</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center gap-2.5">
+                <span className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 dark:text-cyan-400 group-hover:scale-105 transition-transform">
+                  <Activity className="w-4 h-4" />
+                </span>
+                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 flex items-center justify-between flex-1 gap-2">
+                  <span>{t.labValuesLabel} ({labValues.length})</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform rtl:rotate-180" />
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-gray-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 ps-[2.625rem]">
                 {t.labValuesHint}
               </p>
             </button>
@@ -192,13 +210,18 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             <button
               type="button"
               onClick={() => onNavigateTab('vocabulary')}
-              className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
+              className="card-elevated p-5 rounded-2xl hover:border-cyan-500/45 transition-all text-start space-y-2 group"
             >
-              <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.medicalTermsLabel} ({vocabulary.length})</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center gap-2.5">
+                <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 transition-transform">
+                  <BookOpen className="w-4 h-4" />
+                </span>
+                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 flex items-center justify-between flex-1 gap-2">
+                  <span>{t.medicalTermsLabel} ({vocabulary.length})</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform rtl:rotate-180" />
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-gray-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 ps-[2.625rem]">
                 {t.medicalTermsHint}
               </p>
             </button>
@@ -206,13 +229,18 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             <button
               type="button"
               onClick={() => onNavigateTab('doctorPrep')}
-              className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
+              className="card-elevated p-5 rounded-2xl hover:border-cyan-500/45 transition-all text-start space-y-2 group"
             >
-              <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.doctorQuestionsLabel} ({topQuestions.length})</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center gap-2.5">
+                <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 group-hover:scale-105 transition-transform">
+                  <ClipboardList className="w-4 h-4" />
+                </span>
+                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 flex items-center justify-between flex-1 gap-2">
+                  <span>{t.doctorQuestionsLabel} ({topQuestions.length})</span>
+                  <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform rtl:rotate-180" />
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-gray-400">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 ps-[2.625rem]">
                 {t.doctorQuestionsHint}
               </p>
             </button>
@@ -220,15 +248,16 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             <button
               type="button"
               onClick={() => onNavigateTab('chat')}
-              className="bg-blue-600 p-5 rounded-2xl border border-blue-500 hover:bg-blue-500 transition-all text-left space-y-2 group shadow-[0_0_15px_rgba(37,99,235,0.25)]"
+              className="relative overflow-hidden p-5 rounded-2xl btn-primary text-start space-y-2 group"
             >
-              <div className="text-xs font-bold text-white flex items-center justify-between">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+              <div className="relative text-xs font-bold text-white flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" /> {t.tabAskAnything}
                 </span>
-                <ArrowRight className="w-4 h-4 text-blue-100 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-cyan-100 group-hover:translate-x-1 transition-transform rtl:rotate-180" />
               </div>
-              <p className="text-[11px] text-blue-100">
+              <p className="relative text-[11px] text-cyan-50/90">
                 {t.askAnythingHint}
               </p>
             </button>
@@ -240,16 +269,18 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
         <div className="space-y-6">
           
           {/* Key Findings List */}
-          <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 font-serif">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+          <div className="card-elevated rounded-[1.75rem] p-6 space-y-4">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2 font-display">
+              <span className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              </span>
               {t.importantFindingsTitle}
             </h3>
 
             <ul className="space-y-3">
               {importantFindings.map((finding, idx) => (
-                <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-gray-300 leading-relaxed">
-                  <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0 mt-1.5 glow-blue"></span>
+                <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1.5 shadow-[0_0_8px_rgba(34,211,238,0.7)]" />
                   <span>{finding}</span>
                 </li>
               ))}
@@ -257,16 +288,16 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           </div>
 
           {/* Safety Alerts Box */}
-          <div className="bg-amber-50 dark:bg-orange-500/10 rounded-3xl p-6 border border-amber-200 dark:border-orange-500/20 text-amber-900 dark:text-orange-300 space-y-3">
-            <h3 className="text-xs uppercase tracking-widest font-bold flex items-center gap-2 text-amber-800 dark:text-orange-400">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-orange-400 shrink-0" />
+          <div className="rounded-[1.75rem] p-6 border border-amber-200/80 dark:border-amber-500/25 bg-gradient-to-br from-amber-50 to-orange-50/60 dark:from-amber-500/10 dark:to-orange-500/5 text-amber-950 dark:text-amber-100 space-y-3">
+            <h3 className="text-xs uppercase tracking-[0.14em] font-bold flex items-center gap-2 text-amber-800 dark:text-amber-300">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
               {t.safetyNotesTitle}
             </h3>
 
-            <ul className="space-y-2 text-xs leading-relaxed dark:text-gray-300">
+            <ul className="space-y-2.5 text-xs leading-relaxed dark:text-slate-300">
               {safetyAlerts.map((alert, idx) => (
                 <li key={idx} className="flex items-start gap-2">
-                  <span>&bull;</span>
+                  <span className="text-amber-500 font-bold mt-0.5">&bull;</span>
                   <span>{alert}</span>
                 </li>
               ))}

@@ -40,20 +40,20 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
         src={BRAND_LOGO_SRC}
         alt={alt}
         onError={() => setLogoFailed(true)}
-        className={`${className} rounded-xl object-contain shrink-0`}
+        className={`${className} rounded-2xl object-contain shrink-0 ring-1 ring-slate-200/80 dark:ring-white/10 shadow-sm`}
       />
     );
   }
 
   return (
     <div
-      className={`${className} rounded-xl flex items-center justify-center shrink-0 ${
+      className={`${className} rounded-2xl flex items-center justify-center shrink-0 ${
         withBackground
-          ? 'bg-blue-600 text-white glow-blue shadow-[0_0_20px_rgba(37,99,235,0.4)]'
-          : 'bg-blue-600 text-white'
+          ? 'bg-gradient-to-br from-cyan-500 via-cyan-600 to-teal-700 text-white shadow-[0_8px_24px_-6px_rgba(6,182,212,0.55)] ring-1 ring-white/20'
+          : 'bg-cyan-600 text-white'
       }`}
     >
-      <Stethoscope className={iconClassName} />
+      <Stethoscope className={iconClassName} strokeWidth={2.25} />
     </div>
   );
 };
