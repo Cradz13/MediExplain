@@ -104,7 +104,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
       <div className="text-center space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-semibold">
           <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-          <span>Powered by Gemini 3.6 Flash & Vision</span>
+          <span>{t.poweredByGemini}</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-serif text-slate-900 dark:text-white tracking-tight leading-tight">
           {t.heroTitle}
@@ -135,7 +135,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
           <div className="max-w-md mx-auto grid grid-cols-3 gap-2 pt-2 text-xs">
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>OCR & Vision</span>
+              <span>{t.ocrVisionBadge}</span>
             </div>
             <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />

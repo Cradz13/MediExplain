@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { ReportAnalysisResult } from '../types';
 import { Language, translations } from '../utils/i18n';
+import { speak, cancelSpeech, isSpeechSupported } from '../utils/speech';
 
 interface ReportSummaryViewProps {
   analysis: ReportAnalysisResult;
@@ -40,27 +41,25 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
 
   // Audio Speech Narration for layman summary
   const toggleAudioNarration = () => {
-    if (!window.speechSynthesis) return;
+    if (!isSpeechSupported()) return;
 
     if (isPlayingAudio) {
-      window.speechSynthesis.cancel();
+      cancelSpeech();
       setIsPlayingAudio(false);
       return;
     }
 
     const textToSpeak = `${analysis.shortSummary}. ${analysis.laymanExplanation}`;
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
-    utterance.onstart = () => setIsPlayingAudio(true);
-    utterance.onend = () => setIsPlayingAudio(false);
-    utterance.onerror = () => setIsPlayingAudio(false);
 
-    window.speechSynthesis.speak(utterance);
+    speak(textToSpeak, language, {
+      onStart: () => setIsPlayingAudio(true),
+      onEnd: () => setIsPlayingAudio(false),
+      onError: () => setIsPlayingAudio(false),
+    });
   };
 
   const copySummaryToClipboard = () => {
-    const text = `MediExplain AI Summary - ${analysis.fileName}\n\n${analysis.shortSummary}\n\nLayman Explanation:\n${analysis.laymanExplanation}\n\nKey Findings:\n${analysis.importantFindings.map((f) => `- ${f}`).join('\n')}`;
+    const text = `MediExplain - ${analysis.fileName}\n\n${analysis.shortSummary}\n\n${t.plainLanguageExplanation}\n${analysis.laymanExplanation}\n\n${t.importantFindingsTitle}\n${analysis.importantFindings.map((f) => `- ${f}`).join('\n')}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -81,7 +80,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
                 {analysis.patientInfo?.reportType || analysis.fileName} <span className="text-blue-600 dark:text-blue-400 font-serif italic text-xl">{t.analyzedPanel}</span>
               </h2>
               <span className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-400/20 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shrink-0">
-                Patient Report
+                {t.patientReportBadge}
               </span>
             </div>
             
@@ -89,18 +88,18 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               {analysis.patientInfo?.date && (
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                  Report Date: {analysis.patientInfo.date}
+                  {t.reportDateLabel} {analysis.patientInfo.date}
                 </span>
               )}
               {analysis.patientInfo?.laboratory && (
                 <span className="flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-blue-500" />
-                  Facility: {analysis.patientInfo.laboratory}
+                  {t.facilityLabel} {analysis.patientInfo.laboratory}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
                 <Activity className="w-3.5 h-3.5 text-blue-500" />
-                {analysis.labValues.length} Lab Tests Identified
+                {analysis.labValues.length} {t.labTestsIdentified}
               </span>
             </div>
           </div>
@@ -118,7 +117,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             }`}
           >
             {isPlayingAudio ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-            <span>{isPlayingAudio ? 'Stop Narration' : 'Listen to Summary'}</span>
+            <span>{isPlayingAudio ? t.stopNarration : t.listenToSummary}</span>
           </button>
 
           <button
@@ -127,7 +126,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-500 dark:text-gray-400" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            <span>{copied ? t.copiedLabel : t.copyLabel}</span>
           </button>
         </div>
       </div>
@@ -141,7 +140,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           {/* Executive Short Summary Box */}
           <div className="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 dark:bg-white/[0.04] border border-blue-500/30 dark:border-white/10 rounded-3xl p-6 sm:p-8 space-y-3 backdrop-blur-md">
             <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest">
-              <Sparkles className="w-4 h-4" /> Executive AI Summary
+              <Sparkles className="w-4 h-4" /> {t.executiveAiSummary}
             </div>
             <p className="text-base sm:text-lg font-sans leading-relaxed text-slate-900 dark:text-white">
               "{analysis.shortSummary}"
@@ -153,10 +152,10 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-serif text-slate-900 dark:text-white flex items-center gap-2">
                 <Heart className="w-5 h-5 text-rose-500" />
-                Plain Language Explanation
+                {t.plainLanguageExplanation}
               </h3>
               <span className="text-[10px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest">
-                Layman Guide
+                {t.laymanGuideBadge}
               </span>
             </div>
 
@@ -173,11 +172,11 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>Lab Values ({analysis.labValues.length})</span>
+                <span>{t.labValuesLabel} ({analysis.labValues.length})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
-                View color-coded normal vs abnormal values
+                {t.labValuesHint}
               </p>
             </button>
 
@@ -187,11 +186,11 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>Medical Terms ({analysis.vocabulary.length})</span>
+                <span>{t.medicalTermsLabel} ({analysis.vocabulary.length})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
-                Click any term for simple analogies
+                {t.medicalTermsHint}
               </p>
             </button>
 
@@ -201,11 +200,11 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>Doctor Questions ({analysis.doctorPrep?.topQuestions?.length || 5})</span>
+                <span>{t.doctorQuestionsLabel} ({analysis.doctorPrep?.topQuestions?.length || 5})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
-                Printable top questions for visit
+                {t.doctorQuestionsHint}
               </p>
             </button>
           </div>
@@ -219,7 +218,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           <div className="bg-white dark:bg-white/[0.03] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 font-serif">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              Important Findings
+              {t.importantFindingsTitle}
             </h3>
 
             <ul className="space-y-3">
@@ -236,7 +235,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           <div className="bg-amber-50 dark:bg-orange-500/10 rounded-3xl p-6 border border-amber-200 dark:border-orange-500/20 text-amber-900 dark:text-orange-300 space-y-3">
             <h3 className="text-xs uppercase tracking-widest font-bold flex items-center gap-2 text-amber-800 dark:text-orange-400">
               <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-orange-400 shrink-0" />
-              Safety Notes & Guidelines
+              {t.safetyNotesTitle}
             </h3>
 
             <ul className="space-y-2 text-xs leading-relaxed dark:text-gray-300">

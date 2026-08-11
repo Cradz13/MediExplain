@@ -156,7 +156,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
                         {getPriorityBadge(q.priority)}
                       </div>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                        <strong>Why ask:</strong> {q.context}
+                        <strong>{t.whyAskLabel}</strong> {q.context}
                       </p>
                     </div>
                   </div>
@@ -213,7 +213,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
                 onClick={handleAddQuestion}
                 className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0"
               >
-                <Plus className="w-4 h-4" /> Add
+                <Plus className="w-4 h-4" /> {t.addLabel}
               </button>
             </div>
           </div>
@@ -226,7 +226,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
           <div className="bg-white dark:bg-slate-800/90 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/80 shadow-md space-y-3">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <BookmarkCheck className="w-4 h-4 text-blue-600" />
-              Key Discussion Points
+              {t.keyDiscussionPoints}
             </h3>
             <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
               {(doctorPrep?.discussionPoints || []).map((pt, idx) => (
@@ -242,7 +242,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
           <div className="bg-white dark:bg-slate-800/90 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/80 shadow-md space-y-3">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Clock className="w-4 h-4 text-indigo-600" />
-              Things to Monitor
+              {t.thingsToMonitor}
             </h3>
             <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
               {(doctorPrep?.thingsToMonitor || []).map((mon, idx) => (
@@ -263,7 +263,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
           {/* Personal Notes Textarea */}
           <div className="bg-white dark:bg-slate-800/90 rounded-2xl p-6 border border-slate-200 dark:border-slate-700/80 shadow-md space-y-3">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Personal Appointment Notes
+              {t.personalAppointmentNotes}
             </h3>
             <textarea
               value={customNotes}

@@ -21,6 +21,7 @@ import {
 import { analyzeLiveCameraFrame } from '../services/api';
 import { LiveCameraAnalysis } from '../types';
 import { Language, translations } from '../utils/i18n';
+import { speak, cancelSpeech, isSpeechSupported } from '../utils/speech';
 
 interface LiveCameraScannerProps {
   onClose: () => void;
@@ -52,6 +53,13 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
         'Expliquez ce rapport simplement.',
         'Quelles valeurs devrais-je discuter avec mon médecin ?'
       ]
+    : language === 'ar'
+    ? [
+        'ماذا تعني قيمة الكوليسترول هذه؟',
+        'ما هو غير الطبيعي في هذه الصورة؟',
+        'اشرح هذا التقرير بلغة بسيطة.',
+        'ما القيم التي يجب أن أناقشها مع طبيبي؟'
+      ]
     : [
         'What does this cholesterol value mean?',
         'What is abnormal in this view?',
@@ -75,7 +83,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
         }
       } catch (err: any) {
         console.error('Camera access error:', err);
-        setCameraError('Unable to access camera. Please check camera permissions in your browser.');
+        setCameraError(t.cameraAccessError);
       }
     }
 
@@ -85,9 +93,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
       if (currentStream) {
         currentStream.getTracks().forEach((track) => track.stop());
       }
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      cancelSpeech();
     };
   }, []);
 
@@ -106,23 +112,19 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
 
   // Speak response using Web Speech API
   const speakText = (text: string) => {
-    if (!speechEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = language === 'fr' ? 'fr-FR' : 'en-US';
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    if (!speechEnabled || !isSpeechSupported()) return;
+    speak(text, language, {
+      onStart: () => setIsSpeaking(true),
+      onEnd: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
   };
 
   // Trigger Gemini Vision Live Analysis
   const handleScanQuestion = async (question?: string) => {
     const frameBase64 = captureCurrentFrame();
     if (!frameBase64) {
-      setCameraError('Failed to capture video frame.');
+      setCameraError(t.frameCaptureError);
       return;
     }
 
@@ -138,7 +140,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
         speakText(result.keyObservation);
       }
     } catch (err: any) {
-      setCameraError(err.message || 'Error analyzing camera frame');
+      setCameraError(err.message || t.frameAnalyzeError);
     } finally {
       setIsAnalyzingFrame(false);
     }
@@ -166,10 +168,10 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
           </div>
           <div>
             <h2 className="text-sm font-bold text-white flex items-center gap-1.5">
-              Live Camera Scanner
+              {t.liveCameraScanner}
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             </h2>
-            <p className="text-[11px] text-slate-400">Point phone camera at document & ask questions</p>
+            <p className="text-[11px] text-slate-400">{t.cameraScannerSubtitle}</p>
           </div>
         </div>
 
@@ -178,7 +180,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
           <button
             type="button"
             onClick={() => {
-              if (isSpeaking && window.speechSynthesis) window.speechSynthesis.cancel();
+              if (isSpeaking) cancelSpeech();
               setSpeechEnabled(!speechEnabled);
             }}
             className={`p-2 rounded-lg border transition-colors ${
@@ -186,7 +188,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
                 ? 'bg-blue-600/30 border-blue-500 text-blue-300'
                 : 'bg-slate-800 border-slate-700 text-slate-400'
             }`}
-            title={speechEnabled ? 'Mute Speech Output' : 'Enable Speech Output'}
+            title={speechEnabled ? t.muteSpeech : t.enableSpeech}
           >
             {speechEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
           </button>
@@ -218,7 +220,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
               onClick={onClose}
               className="px-4 py-2 rounded-lg bg-slate-800 text-white text-xs font-semibold"
             >
-              Return to Upload
+              {t.returnToUpload}
             </button>
           </div>
         ) : (
@@ -242,7 +244,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
                 <div className="text-center space-y-2 py-4 bg-slate-900/80 backdrop-blur rounded-xl border border-blue-500/50 p-4 animate-pulse">
                   <Loader2 className="w-6 h-6 text-blue-400 animate-spin mx-auto" />
                   <p className="text-xs font-semibold text-blue-300">
-                    Gemini 3.6 Flash analyzing report frame...
+                    {t.analyzingFrame}
                   </p>
                 </div>
               )}
@@ -260,11 +262,11 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
           <div className="absolute top-4 left-4 right-4 sm:left-auto sm:right-4 sm:max-w-md bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-2xl p-4 text-white space-y-3 shadow-2xl z-20">
             <div className="flex items-center justify-between border-b border-slate-800 pb-2">
               <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Live Camera Insights
+                <Sparkles className="w-3.5 h-3.5" /> {t.liveCameraInsights}
               </span>
               {isSpeaking && (
                 <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <Volume2 className="w-3 h-3 animate-pulse" /> Speaking
+                  <Volume2 className="w-3 h-3 animate-pulse" /> {t.speakingLabel}
                 </span>
               )}
             </div>
@@ -276,7 +278,7 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
             {liveAnalysis.detectedValues && liveAnalysis.detectedValues.length > 0 && (
               <div className="space-y-1.5 pt-1">
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                  Detected Values in Frame:
+                  {t.detectedValuesInFrame}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {liveAnalysis.detectedValues.map((val, idx) => (

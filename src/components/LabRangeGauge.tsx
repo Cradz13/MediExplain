@@ -95,9 +95,9 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
           />
         </div>
         <div className="flex justify-between text-[10px] text-slate-400 dark:text-gray-500 font-mono">
-          <span>Low</span>
-          <span>Normal ({referenceRangeStr})</span>
-          <span>High</span>
+          <span>{t.lowLabel}</span>
+          <span>{t.normalLabel} ({referenceRangeStr})</span>
+          <span>{t.highLabel}</span>
         </div>
       </div>
     );
@@ -108,29 +108,29 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
       <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-gray-300">
         <span>{t.referenceSpectrum}</span>
         <span className="font-mono text-[11px] text-slate-500 dark:text-gray-400">
-          Range: <strong className="text-slate-900 dark:text-white">{referenceRangeStr} {unit}</strong>
+          {t.rangeLabel} <strong className="text-slate-900 dark:text-white">{referenceRangeStr} {unit}</strong>
         </span>
       </div>
 
       <div className="relative h-3 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden flex my-2">
         {/* Low zone */}
         <div className="w-1/4 bg-amber-400/20 dark:bg-amber-500/20 text-[9px] font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center border-r border-amber-300/30">
-          Low
+          {t.lowLabel}
         </div>
         {/* Target Normal Zone */}
         <div className="w-2/4 bg-emerald-500/25 dark:bg-emerald-500/30 text-[9px] font-bold text-emerald-700 dark:text-emerald-300 flex items-center justify-center border-r border-emerald-400/30">
-          Target Range
+          {t.targetRange}
         </div>
         {/* High zone */}
         <div className="w-1/4 bg-red-500/20 dark:bg-red-500/20 text-[9px] font-bold text-red-600 dark:text-red-400 flex items-center justify-center">
-          High
+          {t.highLabel}
         </div>
 
         {/* Dynamic Indicator Pin */}
         <div
           className={`absolute top-0 bottom-0 w-3 rounded-full -ml-1.5 border-2 transition-all ${getPinColor()}`}
           style={{ left: `${percent}%` }}
-          title={`Measured Value: ${numVal} ${unit}`}
+          title={`${t.measuredValueLabel} ${numVal} ${unit}`}
         />
       </div>
 
@@ -138,9 +138,9 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
         <span>0</span>
         <span className="font-sans font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-blue-500 inline-block animate-pulse" />
-          Your Value: <strong className="text-slate-900 dark:text-white">{valueStr} {unit}</strong>
+          {t.yourValueLabel} <strong className="text-slate-900 dark:text-white">{valueStr} {unit}</strong>
         </span>
-        <span>High +</span>
+        <span>{t.highLabel} +</span>
       </div>
     </div>
   );
