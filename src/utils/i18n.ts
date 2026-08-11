@@ -165,6 +165,7 @@ export interface Translations {
   doctorPrepBadge: string;
   nonDiagnosticBadge: string;
   footerText: string;
+  followOnInstagram: string;
   viewingLabel: string;
   translatingReport: string;
   poweredByGemini: string;
@@ -394,6 +395,7 @@ export const translations: Record<Language, Translations> = {
     doctorPrepBadge: 'Doctor Prep',
     nonDiagnosticBadge: 'Non-Diagnostic AI',
     footerText: 'MediExplain © 2026. Educational Medical Report Assistant.',
+    followOnInstagram: 'Follow us on Instagram',
     viewingLabel: 'Viewing:',
     translatingReport: 'Translating your report…',
     poweredByGemini: 'Powered by Gemini 3.6 Flash & Vision',
@@ -621,6 +623,7 @@ export const translations: Record<Language, Translations> = {
     doctorPrepBadge: 'Préparation Médecin',
     nonDiagnosticBadge: 'IA Non Diagnostique',
     footerText: 'MediExplain © 2026. Assistant éducatif de rapports médicaux.',
+    followOnInstagram: 'Suivez-nous sur Instagram',
     viewingLabel: 'Affichage :',
     translatingReport: 'Traduction de votre rapport…',
     poweredByGemini: 'Propulsé par Gemini 3.6 Flash & Vision',
@@ -848,6 +851,7 @@ export const translations: Record<Language, Translations> = {
     doctorPrepBadge: 'تحضير الطبيب',
     nonDiagnosticBadge: 'ذكاء اصطناعي غير تشخيصي',
     footerText: 'MediExplain © 2026. مساعد تعليمي للتقارير الطبية.',
+    followOnInstagram: 'تابعنا على إنستغرام',
     viewingLabel: 'المعروض:',
     translatingReport: 'جارٍ ترجمة تقريرك…',
     poweredByGemini: 'مدعوم بـ Gemini 3.6 Flash والرؤية الحاسوبية',
