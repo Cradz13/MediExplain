@@ -16,9 +16,9 @@ import {
   Building2, 
   Activity,
   Heart,
-  Share2,
   Copy,
-  Check
+  Check,
+  MessageSquare
 } from 'lucide-react';
 import { ReportAnalysisResult } from '../types';
 import { Language, translations } from '../utils/i18n';
@@ -165,7 +165,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
           </div>
 
           {/* Quick Action Navigation Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => onNavigateTab('labs')}
@@ -205,6 +205,22 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
                 {t.doctorQuestionsHint}
+              </p>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onNavigateTab('chat')}
+              className="bg-blue-600 p-5 rounded-2xl border border-blue-500 hover:bg-blue-500 transition-all text-left space-y-2 group shadow-[0_0_15px_rgba(37,99,235,0.25)]"
+            >
+              <div className="text-xs font-bold text-white flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" /> {t.tabAskAnything}
+                </span>
+                <ArrowRight className="w-4 h-4 text-blue-100 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <p className="text-[11px] text-blue-100">
+                {t.askAnythingHint}
               </p>
             </button>
           </div>

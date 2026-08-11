@@ -187,6 +187,7 @@ export interface Translations {
   medicalTermsHint: string;
   doctorQuestionsLabel: string;
   doctorQuestionsHint: string;
+  askAnythingHint: string;
   importantFindingsTitle: string;
   safetyNotesTitle: string;
   generalCategory: string;
@@ -414,6 +415,7 @@ export const translations: Record<Language, Translations> = {
     medicalTermsHint: 'Click any term for simple analogies',
     doctorQuestionsLabel: 'Doctor Questions',
     doctorQuestionsHint: 'Printable top questions for visit',
+    askAnythingHint: 'Open the report assistant and ask a question',
     importantFindingsTitle: 'Important Findings',
     safetyNotesTitle: 'Safety Notes & Guidelines',
     generalCategory: 'General',
@@ -639,6 +641,7 @@ export const translations: Record<Language, Translations> = {
     medicalTermsHint: 'Cliquez sur un terme pour une analogie simple',
     doctorQuestionsLabel: 'Questions au Médecin',
     doctorQuestionsHint: 'Questions clés imprimables pour la consultation',
+    askAnythingHint: 'Ouvrez l’assistant et posez une question sur votre rapport',
     importantFindingsTitle: 'Constatations Importantes',
     safetyNotesTitle: 'Consignes de Sécurité',
     generalCategory: 'Général',
@@ -864,6 +867,7 @@ export const translations: Record<Language, Translations> = {
     medicalTermsHint: 'اضغط على أي مصطلح للحصول على تشبيه مبسط',
     doctorQuestionsLabel: 'أسئلة للطبيب',
     doctorQuestionsHint: 'أهم الأسئلة القابلة للطباعة قبل الزيارة',
+    askAnythingHint: 'افتح مساعد التقرير واطرح سؤالك',
     importantFindingsTitle: 'النتائج المهمة',
     safetyNotesTitle: 'ملاحظات وإرشادات السلامة',
     generalCategory: 'عام',
