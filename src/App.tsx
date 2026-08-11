@@ -17,10 +17,12 @@ import { PrintableReportView } from './components/PrintableReportView';
 import { ReportComparisonView } from './components/ReportComparisonView';
 import { ReportAnalysisResult } from './types';
 import { getSampleReports, getSampleReportById, SampleReport } from './data/sampleReports';
-import { ArrowLeft, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, Instagram, ExternalLink } from 'lucide-react';
 import { analyzeReportFile, translateReportResult } from './services/api';
 import { prepareFileForUpload } from './utils/fileProcessing';
 import { Language, translations } from './utils/i18n';
+
+const INSTAGRAM_URL = 'https://www.instagram.com/medi.explain/';
 
 export default function App() {
   // Keep the original analysis separate from the localized version on screen.
@@ -327,6 +329,24 @@ export default function App() {
             </span>
           </div>
           <span className="max-w-xl leading-relaxed">{t.footerText}</span>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${t.followOnInstagram}: @medi.explain`}
+            className="group inline-flex items-center gap-3 rounded-full border border-pink-200/90 bg-white/70 px-4 py-2 text-start shadow-sm transition-all hover:-translate-y-0.5 hover:border-pink-300 hover:shadow-md dark:border-pink-400/20 dark:bg-white/5 dark:hover:border-pink-400/40"
+          >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-600 via-pink-500 to-amber-400 text-white shadow-sm">
+              <Instagram className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <span className="flex flex-col leading-tight">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                {t.followOnInstagram}
+              </span>
+              <span className="mt-0.5 text-sm font-bold text-slate-800 dark:text-white">@medi.explain</span>
+            </span>
+            <ExternalLink className="h-3.5 w-3.5 text-slate-400 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0" aria-hidden="true" />
+          </a>
         </div>
       </footer>
 
