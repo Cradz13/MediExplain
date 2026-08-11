@@ -19,6 +19,7 @@ import { ReportAnalysisResult } from './types';
 import { getSampleReports, getSampleReportById, SampleReport } from './data/sampleReports';
 import { ArrowLeft } from 'lucide-react';
 import { analyzeReportFile, translateReportResult } from './services/api';
+import { prepareFileForUpload } from './utils/fileProcessing';
 import { Language, translations } from './utils/i18n';
 
 export default function App() {
@@ -62,45 +63,50 @@ export default function App() {
     }
   }, [language]);
 
-  // Handle local File Upload (PDF, JPG, PNG, etc.)
+  // Handle local File Upload (PDF, JPG, PNG, HEIC, etc.)
   const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
     setIsAnalyzing(true);
     setErrorMessage(null);
-    setAnalyzingStep('Reading document and processing image/PDF bytes...');
+    setAnalyzingStep(t.stepReadingFile);
 
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
+      // Validate, decode, and normalize the file (converts HEIC/TIFF/etc. to
+      // JPEG and downscales oversized phone photos) before hitting the API.
+      const prepared = await prepareFileForUpload(file, (stage) => {
+        setAnalyzingStep(stage === 'optimizing' ? t.stepOptimizingImage : t.stepReadingFile);
+      });
 
-      reader.onload = async () => {
-        const base64Data = reader.result as string;
-        setAnalyzingStep('Gemini 3.6 Flash analyzing medical tables & terminology...');
+      setAnalyzingStep(t.stepAnalyzing);
 
-        try {
-          const result = await analyzeReportFile(
-            base64Data,
-            file.type || 'application/pdf',
-            file.name,
-            file.type.startsWith('image/') ? 'image' : 'pdf',
-            language
-          );
+      const result = await analyzeReportFile(
+        prepared.dataUrl,
+        prepared.mimeType,
+        prepared.fileName,
+        prepared.kind,
+        language
+      );
 
-          setAnalysis(result);
-          setActiveTab('summary');
-        } catch (err: any) {
-          console.error('Analysis error:', err);
-          setErrorMessage(err.message || 'Failed to analyze medical report.');
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
-
-      reader.onerror = () => {
-        setErrorMessage('Failed to read selected file.');
-        setIsAnalyzing(false);
-      };
+      setAnalysis(result);
+      setActiveTab('summary');
     } catch (err: any) {
-      setErrorMessage(err.message || 'An error occurred uploading file.');
+      console.error('Upload/analysis error:', err);
+
+      // Validation failures surface as short codes we can localize.
+      const code = err?.message;
+      if (code === 'unsupportedType') {
+        setErrorMessage(t.errorUnsupportedType);
+      } else if (code === 'tooLarge') {
+        setErrorMessage(t.errorFileTooLarge);
+      } else if (code === 'empty') {
+        setErrorMessage(t.errorEmptyFile);
+      } else if (typeof code === 'string' && code.toLowerCase().includes('filereader')) {
+        setErrorMessage(t.errorReadFailed);
+      } else {
+        setErrorMessage(code || t.errorAnalyzeFailed);
+      }
+    } finally {
       setIsAnalyzing(false);
     }
   };
@@ -110,7 +116,7 @@ export default function App() {
     setShowLiveCamera(false);
     setIsAnalyzing(true);
     setErrorMessage(null);
-    setAnalyzingStep('Processing camera snapshot with Gemini Vision...');
+    setAnalyzingStep(t.stepAnalyzing);
 
     try {
       const result = await analyzeReportFile(
@@ -123,7 +129,8 @@ export default function App() {
       setAnalysis(result);
       setActiveTab('summary');
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to analyze camera photo.');
+      console.error('Camera analysis error:', err);
+      setErrorMessage(err.message || t.errorAnalyzeFailed);
     } finally {
       setIsAnalyzing(false);
     }

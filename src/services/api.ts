@@ -6,15 +6,59 @@
 import { ReportAnalysisResult, LiveCameraAnalysis, ChatMessage } from '../types';
 
 async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
-  let response = await fetch(url, options);
+  let response: Response;
+
+  try {
+    response = await fetch(url, options);
+  } catch (networkError) {
+    // fetch() only rejects on network-level failures (offline, server down).
+    throw new Error(
+      'Could not reach the server. Please check your connection and make sure the app server is running.'
+    );
+  }
+
   for (let i = 0; i < retries; i++) {
     if (response.ok || (response.status !== 502 && response.status !== 503 && response.status !== 504)) {
       break;
     }
     await new Promise((r) => setTimeout(r, (i + 1) * 1500));
-    response = await fetch(url, options);
+    try {
+      response = await fetch(url, options);
+    } catch {
+      break;
+    }
   }
+
   return response;
+}
+
+/**
+ * Extracts a useful error message from a failed response, tolerating servers
+ * that reply with HTML (proxy errors, 413 pages) instead of JSON.
+ */
+async function extractError(response: Response, fallback: string): Promise<string> {
+  const text = await response.text().catch(() => '');
+
+  if (text) {
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed?.error) return parsed.error;
+    } catch {
+      // Non-JSON body (HTML error page); fall through to status-based message.
+    }
+  }
+
+  if (response.status === 413) {
+    return 'The uploaded file is too large. Please upload a file under 20 MB.';
+  }
+  if (response.status === 429) {
+    return 'The AI service is busy right now. Please wait a moment and try again.';
+  }
+  if (response.status >= 500) {
+    return 'The server had a problem processing this file. Please try again.';
+  }
+
+  return `${fallback} (HTTP ${response.status})`;
 }
 
 export async function analyzeReportFile(
@@ -31,11 +75,14 @@ export async function analyzeReportFile(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `Server returned error status ${response.status}`);
+    throw new Error(await extractError(response, 'Failed to analyze the medical report.'));
   }
 
-  const data = await response.json();
+  const data = await response.json().catch(() => null);
+  if (!data?.result) {
+    throw new Error('The server returned an unexpected response. Please try again.');
+  }
+
   return data.result;
 }
 
@@ -51,8 +98,7 @@ export async function analyzeLiveCameraFrame(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to analyze camera frame');
+    throw new Error(await extractError(response, 'Failed to analyze camera frame.'));
   }
 
   const data = await response.json();
@@ -72,8 +118,7 @@ export async function sendChatMessage(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to get chat response');
+    throw new Error(await extractError(response, 'Failed to get chat response.'));
   }
 
   const data = await response.json();
@@ -91,8 +136,7 @@ export async function translateReportResult(
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to translate report');
+    throw new Error(await extractError(response, 'Failed to translate report.'));
   }
 
   const data = await response.json();

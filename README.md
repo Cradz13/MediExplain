@@ -86,10 +86,33 @@ It translates complex medical documents (blood work, lipid panels, comprehensive
 
 Copy `.env.example` to `.env`:
 
+```bash
+cp .env.example .env
+```
+
 ```env
 # GEMINI_API_KEY: Required for Gemini API calls.
 GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
 ```
+
+> **Note**: Uploads will fail with *"The AI service is not configured on the server"* until a valid
+> `GEMINI_API_KEY` is present in `.env`. Restart the dev server after adding it.
+
+---
+
+## Supported Upload Formats
+
+| Type   | Formats                                        | Notes                                              |
+| ------ | ---------------------------------------------- | -------------------------------------------------- |
+| PDF    | `.pdf`                                         | Sent to Gemini as-is                                |
+| Images | `.jpg`, `.jpeg`, `.png`, `.webp`, `.heic`      | Sent natively                                       |
+| Images | `.heif`, `.tiff`, `.bmp`, `.gif`, `.avif`      | Auto-converted to JPEG in the browser               |
+
+- Maximum file size: **20 MB**.
+- Photos larger than 2200 px on the longest edge are downscaled client-side before upload,
+  which keeps requests fast and well under the server body limit.
+- The MIME type is detected from the file's actual magic bytes on the server, so uploads still
+  work when the browser reports an empty or incorrect type (common on iOS and Android).
 
 ---
 

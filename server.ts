@@ -18,6 +18,21 @@ const PORT = 3000;
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Body-parser errors (payload too large / malformed JSON) must be returned as
+// JSON, otherwise the browser gets an HTML error page and `response.json()`
+// throws an unhelpful "Unexpected token <" in the upload flow.
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err?.type === 'entity.too.large') {
+    return res.status(413).json({
+      error: 'The uploaded file is too large. Please upload a file under 20 MB.',
+    });
+  }
+  if (err instanceof SyntaxError && 'body' in err) {
+    return res.status(400).json({ error: 'The upload request was malformed. Please try again.' });
+  }
+  return next(err);
+});
+
 // Lazy Gemini AI initialization helper
 function getGeminiClient(): GoogleGenAI {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -32,6 +47,156 @@ function getGeminiClient(): GoogleGenAI {
       },
     },
   });
+}
+
+// MIME types Gemini accepts as inline document/image data.
+const SUPPORTED_INLINE_MIME_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'image/heif',
+]);
+
+// Map of common aliases / browser quirks to a canonical supported MIME type.
+const MIME_ALIASES: Record<string, string> = {
+  'image/jpg': 'image/jpeg',
+  'image/pjpeg': 'image/jpeg',
+  'image/x-png': 'image/png',
+  'application/x-pdf': 'application/pdf',
+  'application/acrobat': 'application/pdf',
+  'text/pdf': 'application/pdf',
+};
+
+/**
+ * Detects the real media type from the raw base64 payload by inspecting magic
+ * bytes. Browsers frequently report an empty or wrong MIME type, and sending a
+ * mismatched one makes the Gemini call fail with an opaque 400.
+ */
+function detectMimeFromBase64(base64: string): string | null {
+  // 24 base64 chars ≈ 18 bytes, enough for every signature we check.
+  const header = Buffer.from(base64.slice(0, 64), 'base64');
+  if (header.length < 4) return null;
+
+  // %PDF
+  if (header[0] === 0x25 && header[1] === 0x50 && header[2] === 0x44 && header[3] === 0x46) {
+    return 'application/pdf';
+  }
+  // JPEG: FF D8 FF
+  if (header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff) {
+    return 'image/jpeg';
+  }
+  // PNG: 89 50 4E 47
+  if (header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4e && header[3] === 0x47) {
+    return 'image/png';
+  }
+  // WEBP: "RIFF"...."WEBP"
+  if (header.slice(0, 4).toString('ascii') === 'RIFF' && header.slice(8, 12).toString('ascii') === 'WEBP') {
+    return 'image/webp';
+  }
+  // HEIC/HEIF: ....ftyp{heic,heix,hevc,mif1,heif}
+  if (header.slice(4, 8).toString('ascii') === 'ftyp') {
+    const brand = header.slice(8, 12).toString('ascii');
+    if (['heic', 'heix', 'hevc', 'hevx', 'mif1', 'msf1', 'heif'].includes(brand)) {
+      return 'image/heic';
+    }
+  }
+  // GIF
+  if (header.slice(0, 3).toString('ascii') === 'GIF') return 'image/gif';
+
+  return null;
+}
+
+/**
+ * Normalizes an incoming upload: strips the data-URL prefix, validates the
+ * base64 payload, and resolves a MIME type Gemini will actually accept.
+ */
+function normalizeInlineUpload(fileData: string, declaredMimeType?: string) {
+  if (typeof fileData !== 'string' || fileData.trim() === '') {
+    return { error: 'The uploaded file is empty or could not be read.' };
+  }
+
+  // Accept both raw base64 and full data URLs.
+  const dataUrlMatch = /^data:([^;,]+)?(;base64)?,/.exec(fileData);
+  const base64 = fileData.replace(/^data:[^;,]*(;base64)?,/, '').replace(/\s/g, '');
+
+  if (!base64) {
+    return { error: 'The uploaded file is empty or could not be read.' };
+  }
+
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64)) {
+    return { error: 'The uploaded file could not be decoded. Please try uploading it again.' };
+  }
+
+  const sizeBytes = Math.floor((base64.length * 3) / 4);
+  if (sizeBytes < 64) {
+    return { error: 'The uploaded file is too small or corrupted. Please choose another file.' };
+  }
+  if (sizeBytes > 25 * 1024 * 1024) {
+    return { error: 'The uploaded file is too large. Please upload a file under 20 MB.' };
+  }
+
+  // Priority: real bytes > data-URL type > declared type.
+  const detected = detectMimeFromBase64(base64);
+  const fromDataUrl = dataUrlMatch?.[1]?.toLowerCase().trim();
+  const declared = declaredMimeType?.toLowerCase().trim();
+
+  const candidates = [detected, fromDataUrl, declared].filter(Boolean) as string[];
+
+  let mimeType: string | undefined;
+  for (const candidate of candidates) {
+    const canonical = MIME_ALIASES[candidate] || candidate;
+    if (SUPPORTED_INLINE_MIME_TYPES.has(canonical)) {
+      mimeType = canonical;
+      break;
+    }
+  }
+
+  if (!mimeType) {
+    return {
+      error:
+        'Unsupported file format. Please upload a PDF or an image file (JPG, PNG, WEBP, or HEIC).',
+    };
+  }
+
+  return { base64, mimeType, sizeBytes };
+}
+
+/**
+ * Turns a raw Gemini/SDK error into a user-facing message and HTTP status,
+ * instead of leaking stack traces or unhelpful "[500] undefined" strings.
+ */
+function describeUploadError(err: any): { status: number; message: string } {
+  const raw = String(err?.message || err || '');
+
+  if (raw.includes('GEMINI_API_KEY')) {
+    return {
+      status: 503,
+      message:
+        'The AI service is not configured on the server (missing GEMINI_API_KEY). Please add your API key to the .env file and restart the server.',
+    };
+  }
+  if (raw.includes('API key not valid') || raw.includes('API_KEY_INVALID') || raw.includes('PERMISSION_DENIED')) {
+    return { status: 503, message: 'The configured AI API key is invalid or lacks permission. Please check GEMINI_API_KEY.' };
+  }
+  if (raw.includes('429') || raw.includes('RESOURCE_EXHAUSTED') || raw.includes('quota')) {
+    return { status: 429, message: 'The AI service is rate-limited right now. Please wait a moment and try again.' };
+  }
+  if (raw.includes('503') || raw.includes('UNAVAILABLE') || raw.includes('Overloaded')) {
+    return { status: 503, message: 'The AI service is temporarily overloaded. Please try again in a few seconds.' };
+  }
+  if (raw.includes('unsupported') || raw.includes('Unsupported MIME') || raw.includes('INVALID_ARGUMENT')) {
+    return {
+      status: 400,
+      message: 'The AI service could not read this file. Please try a clearer photo, or export the report as PDF/JPG.',
+    };
+  }
+  if (raw.includes('SAFETY') || raw.includes('blocked')) {
+    return { status: 400, message: 'This document could not be processed by the safety filters. Please try a different file.' };
+  }
+
+  return { status: 500, message: raw || 'An unexpected error occurred while analyzing the report.' };
 }
 
 // Helper to clean and parse JSON strings that may contain markdown block formatting
@@ -137,8 +302,19 @@ app.post('/api/analyze-report', async (req, res) => {
     const { fileData, mimeType, fileName, fileType, language = 'en' } = req.body;
 
     if (!fileData) {
-      return res.status(400).json({ error: 'fileData (base64 string) is required.' });
+      return res.status(400).json({ error: 'No file was received. Please select a file and try again.' });
     }
+
+    // Validate + normalize the payload before spending a Gemini call on it.
+    const normalized = normalizeInlineUpload(fileData, mimeType);
+    if ('error' in normalized) {
+      console.warn('[analyze-report] Rejected upload:', normalized.error);
+      return res.status(400).json({ error: normalized.error });
+    }
+
+    console.log(
+      `[analyze-report] Received "${fileName || 'unnamed'}" (${normalized.mimeType}, ${(normalized.sizeBytes / 1024).toFixed(0)} KB)`
+    );
 
     const ai = getGeminiClient();
 
@@ -147,8 +323,8 @@ app.post('/api/analyze-report', async (req, res) => {
     // Attach inline media
     parts.push({
       inlineData: {
-        mimeType: mimeType || 'application/pdf',
-        data: fileData.replace(/^data:[^;]+;base64,/, ''),
+        mimeType: normalized.mimeType,
+        data: normalized.base64,
       },
     });
 
@@ -253,7 +429,8 @@ Return a JSON object following this exact structure:
     res.json({ success: true, result });
   } catch (err: any) {
     console.error('Error in /api/analyze-report:', err);
-    res.status(500).json({ error: err.message || 'An error occurred during report analysis.' });
+    const { status, message } = describeUploadError(err);
+    res.status(status).json({ error: message });
   }
 });
 
@@ -263,7 +440,12 @@ app.post('/api/camera-frame-live', async (req, res) => {
     const { imageBase64, userQuestion, language = 'en' } = req.body;
 
     if (!imageBase64) {
-      return res.status(400).json({ error: 'imageBase64 frame is required.' });
+      return res.status(400).json({ error: 'No camera frame was received.' });
+    }
+
+    const normalizedFrame = normalizeInlineUpload(imageBase64, 'image/jpeg');
+    if ('error' in normalizedFrame) {
+      return res.status(400).json({ error: normalizedFrame.error });
     }
 
     const ai = getGeminiClient();
@@ -281,8 +463,8 @@ app.post('/api/camera-frame-live', async (req, res) => {
         parts: [
           {
             inlineData: {
-              mimeType: 'image/jpeg',
-              data: imageBase64.replace(/^data:[^;]+;base64,/, ''),
+              mimeType: normalizedFrame.mimeType,
+              data: normalizedFrame.base64,
             },
           },
           { text: promptText },
@@ -311,7 +493,8 @@ app.post('/api/camera-frame-live', async (req, res) => {
     res.json({ success: true, analysis: parsed });
   } catch (err: any) {
     console.error('Error in /api/camera-frame-live:', err);
-    res.status(500).json({ error: err.message || 'Live camera analysis failed.' });
+    const { status, message } = describeUploadError(err);
+    res.status(status).json({ error: message });
   }
 });
 
@@ -473,7 +656,7 @@ ${JSON.stringify(report, null, 2)}`;
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true, hmr: false },
+      server: { middlewareMode: true, hmr: false, allowedHosts: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
