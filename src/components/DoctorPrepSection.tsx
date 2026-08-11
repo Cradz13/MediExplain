@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { DoctorPrepData, DoctorQuestion } from '../types';
 import { Language, translations } from '../utils/i18n';
+import { toArray } from '../utils/format';
 
 interface DoctorPrepSectionProps {
   doctorPrep: DoctorPrepData;
@@ -78,7 +79,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
     }
   };
 
-  const questionsList: DoctorQuestion[] = doctorPrep?.topQuestions || [];
+  const questionsList: DoctorQuestion[] = toArray(doctorPrep?.topQuestions);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -116,18 +117,25 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
                 {t.topQuestionsTitle}
               </h3>
               <span className="text-xs text-slate-400 dark:text-gray-500 font-medium">
-                {Object.values(checkedQuestions).filter(Boolean).length} of {questionsList.length + userQuestions.length} {t.checkedCount}
+                {/* "3 / 10 Checked" reads correctly in EN, FR and RTL Arabic,
+                    unlike the hardcoded English word "of" used before. */}
+                {Object.values(checkedQuestions).filter(Boolean).length} / {questionsList.length + userQuestions.length}{' '}
+                {t.checkedCount}
               </span>
             </div>
 
             {/* Questions List */}
             <div className="space-y-3">
-              {questionsList.map((q) => {
-                const isChecked = Boolean(checkedQuestions[q.id]);
+              {questionsList.map((q, idx) => {
+                // Fall back to the index when the model omits an id, otherwise
+                // every question would share the key "undefined" and ticking
+                // one checkbox would appear to tick several.
+                const questionId = q.id || `ai-q-${idx}`;
+                const isChecked = Boolean(checkedQuestions[questionId]);
                 return (
                   <div
-                    key={q.id}
-                    onClick={() => toggleCheck(q.id)}
+                    key={questionId}
+                    onClick={() => toggleCheck(questionId)}
                     className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
                       isChecked
                         ? 'bg-blue-50/40 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20 opacity-75'
@@ -229,7 +237,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
               {t.keyDiscussionPoints}
             </h3>
             <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
-              {(doctorPrep?.discussionPoints || []).map((pt, idx) => (
+              {toArray(doctorPrep?.discussionPoints).map((pt, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="text-blue-500 font-bold">&bull;</span>
                   <span>{pt}</span>
@@ -245,7 +253,7 @@ export const DoctorPrepSection: React.FC<DoctorPrepSectionProps> = ({
               {t.thingsToMonitor}
             </h3>
             <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
-              {(doctorPrep?.thingsToMonitor || []).map((mon, idx) => (
+              {toArray(doctorPrep?.thingsToMonitor).map((mon, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="text-indigo-500 font-bold">&bull;</span>
                   <span>{mon}</span>

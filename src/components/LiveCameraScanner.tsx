@@ -70,12 +70,29 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
   // Start Camera Stream
   useEffect(() => {
     let currentStream: MediaStream | null = null;
+    // `getUserMedia` resolves asynchronously, so the scanner can be closed (or
+    // the effect re-run by StrictMode) before permission is granted. Without
+    // this flag the late-arriving stream is never stopped and the device camera
+    // light stays on until the tab is closed.
+    let cancelled = false;
+
     async function startCamera() {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraError(t.cameraAccessError);
+        return;
+      }
+
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
         });
+
+        if (cancelled) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          return;
+        }
+
         currentStream = mediaStream;
         setStream(mediaStream);
         if (videoRef.current) {
@@ -83,29 +100,50 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
         }
       } catch (err: any) {
         console.error('Camera access error:', err);
-        setCameraError(t.cameraAccessError);
+        if (!cancelled) setCameraError(t.cameraAccessError);
       }
     }
 
     startCamera();
 
     return () => {
+      cancelled = true;
       if (currentStream) {
         currentStream.getTracks().forEach((track) => track.stop());
       }
       cancelSpeech();
     };
+    // `t` is intentionally omitted: re-running this effect would restart the
+    // camera (and re-prompt for permission) every time the language changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Attach the stream once the <video> element exists. Setting `srcObject`
+  // inside the async callback above can miss if the ref is not mounted yet
+  // (e.g. while the error state is rendered), leaving a black preview.
+  useEffect(() => {
+    if (stream && videoRef.current && videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
 
   // Capture Base64 Frame
   const captureCurrentFrame = (): string | null => {
     if (!videoRef.current || !canvasRef.current) return null;
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+
+    // Before the first frame decodes, videoWidth/Height are 0. Falling back to
+    // 640x480 produced a pure black JPEG that was uploaded and analyzed anyway,
+    // so the user paid for a request that could only fail to read anything.
+    if (!video.videoWidth || !video.videoHeight) return null;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
+
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg', 0.85);
   };
@@ -149,12 +187,17 @@ export const LiveCameraScanner: React.FC<LiveCameraScannerProps> = ({
   // Capture frame as full medical report
   const handleCaptureFullReport = () => {
     const frameBase64 = captureCurrentFrame();
-    if (frameBase64) {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
-      }
-      onCaptureFrameAsReport(frameBase64);
+    if (!frameBase64) {
+      // The video element had no frame yet (camera still warming up).
+      setCameraError(t.frameCaptureError);
+      return;
     }
+
+    cancelSpeech();
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+    onCaptureFrameAsReport(frameBase64);
   };
 
   return (

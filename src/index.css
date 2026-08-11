@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 resolves `dark:` against `prefers-color-scheme` by default, so
+ * every `dark:` class in the app followed the operating system instead of the
+ * theme the app itself controls (the `.dark` class on <html>). That made the
+ * in-app theme toggle a no-op and left users on a light OS looking at the light
+ * palette even though the app renders itself as a dark product.
+ *
+ * Binding the variant to the `.dark` class puts the app in charge again.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
@@ -14,6 +25,10 @@
   .glow-blue {
     box-shadow: 0 0 20px rgba(37, 99, 235, 0.35);
   }
+}
+
+html {
+  color-scheme: light;
 }
 
 html.dark {

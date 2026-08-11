@@ -54,7 +54,10 @@ It translates complex medical documents (blood work, lipid panels, comprehensive
 ├── index.html
 ├── metadata.json
 ├── package.json
-├── server.ts                  # Express backend proxying Gemini API calls
+├── server.ts                  # Local entry point (Express + Vite middleware)
+├── api
+│   ├── _app.ts                # Shared Express app: all Gemini-backed routes
+│   └── index.ts               # Vercel serverless entry point
 ├── src
 │   ├── App.tsx                # Main React state router & dark mode provider
 │   ├── main.tsx
@@ -62,11 +65,16 @@ It translates complex medical documents (blood work, lipid panels, comprehensive
 │   ├── types.ts               # TypeScript types for reports, labs, glossary
 │   ├── services
 │   │   └── api.ts             # API client service for server communication
+│   ├── utils
+│   │   ├── i18n.ts            # EN / FR / AR interface translations
+│   │   ├── format.ts          # Defensive coercion for model-generated data
+│   │   ├── fileProcessing.ts  # Client-side validation, HEIC/TIFF conversion
+│   │   └── speech.ts          # Browser SpeechSynthesis voice selection
 │   ├── data
 │   │   ├── sampleReports.ts   # Pre-loaded sample medical reports
 │   │   └── medicalGlossary.ts # Common medical terms, analogies, definitions
 │   └── components
-│       ├── Header.tsx text    # Apple-level navbar with theme toggle
+│       ├── Header.tsx         # Navbar with theme toggle, language and tabs
 │       ├── DisclaimerBanner.tsx # Universal non-diagnostic disclaimer
 │       ├── UploadSection.tsx  # Drag & drop upload & demo selector
 │       ├── LiveCameraScanner.tsx # Real-time camera scanner modal
@@ -75,6 +83,7 @@ It translates complex medical documents (blood work, lipid panels, comprehensive
 │       ├── MedicalVocabulary.tsx # Searchable glossary with analogies
 │       ├── AskAnythingChat.tsx # Context-aware report assistant
 │       ├── DoctorPrepSection.tsx # Doctor visit checklist
+│       ├── ReportComparisonView.tsx # Trend comparison against a benchmark
 │       └── PrintableReportView.tsx # Print/PDF output layout
 ├── tsconfig.json
 └── vite.config.ts

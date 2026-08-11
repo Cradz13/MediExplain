@@ -19,6 +19,7 @@ import {
 import { LabValueItem, LabStatus } from '../types';
 import { LabRangeGauge } from './LabRangeGauge';
 import { Language, translations } from '../utils/i18n';
+import { toArray } from '../utils/format';
 
 interface LabValuesGridProps {
   labValues: LabValueItem[];
@@ -30,7 +31,10 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
   const [activeModalItem, setActiveModalItem] = useState<LabValueItem | null>(null);
   const t = translations[language];
 
-  const filteredValues = labValues.filter((item) => {
+  // `labValues` comes from a model response, so it may be missing entirely.
+  const allValues = toArray(labValues);
+
+  const filteredValues = allValues.filter((item) => {
     if (selectedFilter === 'all') return true;
     return item.status === selectedFilter;
   });
@@ -95,7 +99,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white/10'
             }`}
           >
-            {t.allStatuses} ({labValues.length})
+            {t.allStatuses} ({allValues.length})
           </button>
           
           <button
@@ -107,7 +111,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 : 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 hover:bg-orange-500/20'
             }`}
           >
-            {t.statusDiscussion} ({labValues.filter((v) => v.status === 'discussion').length})
+            {t.statusDiscussion} ({allValues.filter((v) => v.status === 'discussion').length})
           </button>
 
           <button
@@ -119,7 +123,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20'
             }`}
           >
-            {t.statusAttention} ({labValues.filter((v) => v.status === 'attention').length})
+            {t.statusAttention} ({allValues.filter((v) => v.status === 'attention').length})
           </button>
 
           <button
@@ -131,16 +135,16 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
             }`}
           >
-            {t.statusNormal} ({labValues.filter((v) => v.status === 'normal').length})
+            {t.statusNormal} ({allValues.filter((v) => v.status === 'normal').length})
           </button>
         </div>
       </div>
 
       {/* Grid of Lab Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredValues.map((item) => (
+        {filteredValues.map((item, idx) => (
           <div
-            key={item.id}
+            key={item.id || `${item.name}-${idx}`}
             onClick={() => setActiveModalItem(item)}
             className={`rounded-3xl p-6 border shadow-sm hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between space-y-4 group ${getCardBorder(
               item.status
@@ -276,7 +280,7 @@ export const LabValuesGrid: React.FC<LabValuesGridProps> = ({ labValues, languag
                 {t.questionsToAskDoctor}
               </h4>
               <ul className="space-y-2">
-                {activeModalItem.questionsToAsk.map((q, idx) => (
+                {toArray(activeModalItem.questionsToAsk).map((q, idx) => (
                   <li key={idx} className="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-orange-500/10 border border-amber-200/60 dark:border-orange-500/20 text-xs font-medium text-amber-900 dark:text-orange-200 flex items-start gap-2">
                     <span className="text-amber-600 dark:text-orange-400 font-bold">&bull;</span>
                     <span>"{q}"</span>

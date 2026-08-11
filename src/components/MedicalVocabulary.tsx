@@ -17,6 +17,7 @@ import {
 import { MedicalTerm } from '../types';
 import { getMedicalGlossary } from '../data/medicalGlossary';
 import { Language, translations } from '../utils/i18n';
+import { toArray, toText } from '../utils/format';
 
 interface MedicalVocabularyProps {
   reportTerms: MedicalTerm[];
@@ -32,10 +33,14 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
   const glossary = getMedicalGlossary(currentLang);
 
   // Merge report terms with common glossary items without duplicates
-  const allTerms: MedicalTerm[] = [...reportTerms];
+  // `reportTerms` is model-generated and can be missing on a sparse analysis.
+  const termsFromReport: MedicalTerm[] = toArray(reportTerms).filter(
+    (term): term is MedicalTerm => Boolean(term) && typeof term === 'object'
+  );
+  const allTerms: MedicalTerm[] = [...termsFromReport];
   
   glossary.forEach((commonTerm) => {
-    if (!allTerms.some((t) => t.term.toLowerCase() === commonTerm.term.toLowerCase())) {
+    if (!allTerms.some((t) => toText(t.term).toLowerCase() === toText(commonTerm.term).toLowerCase())) {
       allTerms.push(commonTerm);
     }
   });
@@ -44,10 +49,11 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
   const categories = ['all', ...Array.from(new Set(allTerms.map((t) => t.category).filter(Boolean)))];
 
   const filteredTerms = allTerms.filter((term) => {
+    const query = searchQuery.toLowerCase();
     const matchesSearch =
-      term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      term.definition.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      term.analogy.toLowerCase().includes(searchQuery.toLowerCase());
+      toText(term.term).toLowerCase().includes(query) ||
+      toText(term.definition).toLowerCase().includes(query) ||
+      toText(term.analogy).toLowerCase().includes(query);
 
     const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
 
@@ -71,7 +77,7 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
           </div>
 
           <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold bg-blue-50 dark:bg-blue-500/10 px-3.5 py-1.5 rounded-full border border-blue-200 dark:border-blue-500/20">
-            {reportTerms.length} {t.termsExtracted}
+            {termsFromReport.length} {t.termsExtracted}
           </div>
         </div>
 
@@ -111,7 +117,9 @@ export const MedicalVocabulary: React.FC<MedicalVocabularyProps> = ({ reportTerm
       {/* Grid of Medical Vocabulary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {filteredTerms.map((item, idx) => {
-          const isFromReport = reportTerms.some((rt) => rt.term.toLowerCase() === item.term.toLowerCase());
+          const isFromReport = termsFromReport.some(
+            (rt) => toText(rt.term).toLowerCase() === toText(item.term).toLowerCase()
+          );
 
           return (
             <div

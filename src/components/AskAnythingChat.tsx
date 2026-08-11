@@ -38,7 +38,10 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
     timestamp: Date.now(),
   });
 
-  const [messages, setMessages] = useState<ChatMessage[]>(createWelcomeMessage);
+  // Lazy initializer must return the array itself - passing `createWelcomeMessage`
+  // directly seeded state with a bare object, so the first `messages.map()`
+  // threw and the Ask Anything tab rendered as a blank screen.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage()]);
 
   const [inputMessage, setInputMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -223,8 +226,9 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
             <button
               key={idx}
               type="button"
+              disabled={isSending}
               onClick={() => handleSendMessage(prompt)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-white/5 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors whitespace-nowrap"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-white/5 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {prompt}
             </button>
@@ -243,6 +247,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
+            disabled={isSending}
             placeholder={t.askAnythingPlaceholder}
             className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full px-5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
           />

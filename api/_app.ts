@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -200,17 +200,214 @@ function describeUploadError(err: any): { status: number; message: string } {
   return { status: 500, message: raw || 'An unexpected error occurred while analyzing the report.' };
 }
 
+/**
+ * Logs an endpoint failure. A missing/invalid API key is a configuration
+ * problem, not a bug, so it is logged as a one-line warning instead of a stack
+ * trace that buries the actual signal in the server output.
+ */
+function logEndpointError(endpoint: string, err: any) {
+  const raw = String(err?.message || err || '');
+  if (raw.includes('GEMINI_API_KEY')) {
+    console.warn(`[${endpoint}] ${raw}`);
+    return;
+  }
+  console.error(`Error in ${endpoint}:`, err);
+}
+
 // Helper to clean and parse JSON strings that may contain markdown block formatting
 function cleanAndParseJSON(text: string): any {
   let cleaned = text.trim();
   if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
   }
-  return JSON.parse(cleaned);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    // The model occasionally wraps the object in prose or gets truncated by the
+    // output-token limit. Recover the outermost JSON object when we can, so a
+    // cosmetic formatting slip does not fail an otherwise usable analysis.
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start !== -1 && end > start) {
+      return JSON.parse(cleaned.slice(start, end + 1));
+    }
+    throw err;
+  }
 }
 
-// Robust Gemini API caller with retries, exponential backoff, and fallback model candidate handling
-const FALLBACK_MODELS = ['gemini-flash-latest', 'gemini-3.1-flash-lite'];
+/* -------------------------------------------------------------------------- */
+/* Response normalization                                                      */
+/*                                                                            */
+/* The model returns free-form JSON. Even with an explicit schema in the       */
+/* prompt it will sometimes emit a number where the UI expects a string        */
+/* ("value": 238), a string where an array is expected, or omit a key          */
+/* entirely. The React components call `.map()` / `.replace()` on those        */
+/* fields, so an unexpected shape crashed the whole page (white screen) after  */
+/* the user had already paid for the upload and the analysis.                  */
+/*                                                                            */
+/* Everything below coerces the payload into exactly the shape declared in     */
+/* `src/types.ts`, so the client can render any response safely.               */
+/* -------------------------------------------------------------------------- */
+
+const LAB_STATUSES = new Set(['normal', 'discussion', 'attention']);
+const QUESTION_PRIORITIES = new Set(['high', 'medium', 'standard']);
+
+/** Coerces any scalar into a trimmed string; objects/arrays/null become ''. */
+function asString(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  if (typeof value === 'boolean') return String(value);
+  return fallback;
+}
+
+/** Coerces a value into an array of non-empty strings. */
+function asStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((entry) => asString(entry)).filter(Boolean);
+  }
+  const single = asString(value);
+  return single ? [single] : [];
+}
+
+function normalizeLabValues(value: unknown): any[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((item) => item && typeof item === 'object')
+    .map((item: any, index: number) => {
+      const status = asString(item.status).toLowerCase();
+      return {
+        id: asString(item.id) || `val-${index + 1}`,
+        name: asString(item.name) || `Test ${index + 1}`,
+        value: asString(item.value),
+        unit: asString(item.unit),
+        referenceRange: asString(item.referenceRange ?? item.reference_range),
+        status: LAB_STATUSES.has(status) ? status : 'normal',
+        category: asString(item.category),
+        whatItMeasures: asString(item.whatItMeasures),
+        whyItMatters: asString(item.whyItMatters),
+        questionsToAsk: asStringArray(item.questionsToAsk),
+        isAbnormal: Boolean(item.isAbnormal) || status === 'attention' || status === 'discussion',
+      };
+    });
+}
+
+function normalizeVocabulary(value: unknown): any[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((item) => item && typeof item === 'object')
+    .map((item: any) => ({
+      term: asString(item.term),
+      definition: asString(item.definition),
+      whyItMatters: asString(item.whyItMatters),
+      analogy: asString(item.analogy),
+      category: asString(item.category),
+    }))
+    .filter((item) => item.term);
+}
+
+function normalizeDoctorPrep(value: unknown): any {
+  const source = (value && typeof value === 'object' ? value : {}) as any;
+
+  const topQuestions = Array.isArray(source.topQuestions)
+    ? source.topQuestions
+        .filter((item: any) => item && typeof item === 'object')
+        .map((item: any, index: number) => {
+          const priority = asString(item.priority).toLowerCase();
+          return {
+            id: asString(item.id) || `q${index + 1}`,
+            question: asString(item.question),
+            context: asString(item.context),
+            priority: QUESTION_PRIORITIES.has(priority) ? priority : 'standard',
+            category: asString(item.category),
+          };
+        })
+        .filter((item: any) => item.question)
+    : [];
+
+  return {
+    topQuestions,
+    discussionPoints: asStringArray(source.discussionPoints),
+    thingsToMonitor: asStringArray(source.thingsToMonitor),
+    followUpTimeline: asString(source.followUpTimeline),
+  };
+}
+
+/** Builds a fully-formed `ReportAnalysisResult` from a raw model response. */
+function normalizeAnalysis(parsed: any, meta: { fileName?: string; fileType?: string }) {
+  const source = (parsed && typeof parsed === 'object' ? parsed : {}) as any;
+  const patientInfo = (source.patientInfo && typeof source.patientInfo === 'object'
+    ? source.patientInfo
+    : {}) as any;
+
+  const labValues = normalizeLabValues(source.labValues);
+  const safetyAlerts = asStringArray(source.safetyAlerts);
+
+  return {
+    id: `report-${Date.now()}`,
+    fileName: asString(meta.fileName) || 'Uploaded_Medical_Report',
+    fileType: meta.fileType === 'image' || meta.fileType === 'camera_capture' ? meta.fileType : 'pdf',
+    patientInfo: {
+      date: asString(patientInfo.date),
+      reportType: asString(patientInfo.reportType),
+      laboratory: asString(patientInfo.laboratory),
+    },
+    shortSummary: asString(source.shortSummary) || 'Medical report analyzed.',
+    laymanExplanation: asString(source.laymanExplanation) || 'No detailed explanation generated.',
+    importantFindings: asStringArray(source.importantFindings),
+    safetyAlerts: safetyAlerts.length
+      ? safetyAlerts
+      : ['Discuss these findings with your doctor.'],
+    hasCriticalFindings: Boolean(source.hasCriticalFindings),
+    labValues,
+    vocabulary: normalizeVocabulary(source.vocabulary),
+    doctorPrep: normalizeDoctorPrep(source.doctorPrep),
+    timestamp: Date.now(),
+  };
+}
+
+/** Normalizes a live camera frame analysis into the shape the overlay expects. */
+function normalizeCameraAnalysis(parsed: any, fallbackText: string) {
+  const source = (parsed && typeof parsed === 'object' ? parsed : {}) as any;
+
+  const detectedValues = Array.isArray(source.detectedValues)
+    ? source.detectedValues
+        .filter((item: any) => item && typeof item === 'object')
+        .map((item: any) => {
+          const status = asString(item.status).toLowerCase();
+          return {
+            name: asString(item.name),
+            value: asString(item.value),
+            status: LAB_STATUSES.has(status) ? status : 'normal',
+          };
+        })
+        .filter((item: any) => item.name)
+    : [];
+
+  const keyObservation =
+    asString(source.keyObservation) ||
+    asString(source.detectedTextSummary) ||
+    fallbackText ||
+    'Document scanned successfully.';
+
+  return {
+    timestamp: Date.now(),
+    detectedTextSummary: asString(source.detectedTextSummary) || keyObservation,
+    keyObservation,
+    detectedValues,
+    suggestedDoctorQuestions: asStringArray(source.suggestedDoctorQuestions),
+    spokenResponse: asString(source.spokenResponse) || keyObservation,
+  };
+}
+
+// Robust Gemini API caller with retries, exponential backoff, and fallback model candidate handling.
+//
+// The fallbacks are real, currently-served model IDs. A model that no longer
+// exists answers with a non-transient 404 NOT_FOUND, which previously aborted
+// the whole request instead of moving on to the next candidate.
+const FALLBACK_MODELS = ['gemini-3.5-flash', 'gemini-3.1-flash-lite'];
 
 interface GenerateOptions {
   ai: GoogleGenAI;
@@ -218,16 +415,31 @@ interface GenerateOptions {
   contents: any;
   config?: any;
   maxRetries?: number;
+  /**
+   * Set false for requests only one model can serve (e.g. audio output). The
+   * text fallbacks cannot honour an AUDIO response modality, so falling back
+   * would turn a clean "unavailable" into a confusing error.
+   */
+  allowFallbackModels?: boolean;
 }
 
 async function generateContentWithRetry(options: GenerateOptions) {
-  const { ai, model = 'gemini-3.6-flash', contents, config, maxRetries = 3 } = options;
+  const {
+    ai,
+    model = 'gemini-3.6-flash',
+    contents,
+    config,
+    maxRetries = 3,
+    allowFallbackModels = true,
+  } = options;
 
   // Prioritize target model, then candidate fallback models
   const modelsToTry = [model];
-  for (const candidate of FALLBACK_MODELS) {
-    if (!modelsToTry.includes(candidate)) {
-      modelsToTry.push(candidate);
+  if (allowFallbackModels) {
+    for (const candidate of FALLBACK_MODELS) {
+      if (!modelsToTry.includes(candidate)) {
+        modelsToTry.push(candidate);
+      }
     }
   }
 
@@ -257,6 +469,20 @@ async function generateContentWithRetry(options: GenerateOptions) {
           fullErrText.includes('Overloaded') ||
           fullErrText.includes('FetchError') ||
           fullErrText.includes('ETIMEDOUT');
+
+        // A model that was renamed or retired answers 404/NOT_FOUND. Retrying
+        // it is pointless, but the next candidate in the list may well work, so
+        // skip ahead instead of failing the whole request.
+        const isUnknownModel =
+          fullErrText.includes('404') ||
+          fullErrText.includes('NOT_FOUND') ||
+          fullErrText.includes('is not found') ||
+          fullErrText.includes('not supported');
+
+        if (isUnknownModel) {
+          console.warn(`[Gemini API] ${currentModel} is unavailable on this API version. Trying the next model...`);
+          break;
+        }
 
         if (isTransient) {
           if (attempt < maxRetries) {
@@ -406,30 +632,11 @@ Return a JSON object following this exact structure:
       return res.status(500).json({ error: 'Failed to format medical report analysis result.' });
     }
 
-    const result = {
-      id: `report-${Date.now()}`,
-      fileName: fileName || 'Uploaded_Medical_Report',
-      fileType: fileType || 'pdf',
-      patientInfo: parsedData.patientInfo || {},
-      shortSummary: parsedData.shortSummary || 'Medical report analyzed.',
-      laymanExplanation: parsedData.laymanExplanation || 'No detailed explanation generated.',
-      importantFindings: parsedData.importantFindings || [],
-      safetyAlerts: parsedData.safetyAlerts || ['Discuss these findings with your doctor.'],
-      hasCriticalFindings: Boolean(parsedData.hasCriticalFindings),
-      labValues: parsedData.labValues || [],
-      vocabulary: parsedData.vocabulary || [],
-      doctorPrep: parsedData.doctorPrep || {
-        topQuestions: [],
-        discussionPoints: [],
-        thingsToMonitor: [],
-        followUpTimeline: 'Consult your doctor.',
-      },
-      timestamp: Date.now(),
-    };
+    const result = normalizeAnalysis(parsedData, { fileName, fileType });
 
     res.json({ success: true, result });
   } catch (err: any) {
-    console.error('Error in /api/analyze-report:', err);
+    logEndpointError('/api/analyze-report', err);
     const { status, message } = describeUploadError(err);
     res.status(status).json({ error: message });
   }
@@ -482,18 +689,14 @@ app.post('/api/camera-frame-live', async (req, res) => {
     try {
       parsed = cleanAndParseJSON(textResult);
     } catch {
-      parsed = {
-        detectedTextSummary: 'Analyzed visible report frame.',
-        keyObservation: response.text || 'Document scanned successfully.',
-        detectedValues: [],
-        suggestedDoctorQuestions: ['What do these readings mean for my care plan?'],
-        spokenResponse: response.text || 'Document scanned successfully.',
-      };
+      // Not valid JSON: treat the raw text as the spoken observation instead of
+      // dropping the answer the user is waiting to hear.
+      parsed = {};
     }
 
-    res.json({ success: true, analysis: parsed });
+    res.json({ success: true, analysis: normalizeCameraAnalysis(parsed, response.text || '') });
   } catch (err: any) {
-    console.error('Error in /api/camera-frame-live:', err);
+    logEndpointError('/api/camera-frame-live', err);
     const { status, message } = describeUploadError(err);
     res.status(status).json({ error: message });
   }
@@ -555,8 +758,9 @@ Instructions for Chat:
       answer: response.text || 'I analyzed your query based on your report.',
     });
   } catch (err: any) {
-    console.error('Error in /api/chat:', err);
-    res.status(500).json({ error: err.message || 'Chat service encountered an error.' });
+    logEndpointError('/api/chat', err);
+    const { status, message } = describeUploadError(err);
+    res.status(status).json({ error: message || 'Chat service encountered an error.' });
   }
 });
 
@@ -573,6 +777,8 @@ app.post('/api/tts', async (req, res) => {
     const response = await generateContentWithRetry({
       ai,
       model: 'gemini-3.1-flash-tts-preview',
+      // Only a TTS model can return audio; the text fallbacks cannot.
+      allowFallbackModels: false,
       contents: [{ parts: [{ text: `Say clearly in a calm tone: ${text}` }] }],
       config: {
         responseModalities: ['AUDIO' as any],
@@ -592,7 +798,7 @@ app.post('/api/tts', async (req, res) => {
       return res.json({ success: false, message: 'Audio generation unavailable.' });
     }
   } catch (err: any) {
-    console.error('Error in /api/tts:', err);
+    logEndpointError('/api/tts', err);
     res.status(500).json({ error: err.message || 'Speech generation failed.' });
   }
 });
@@ -634,23 +840,56 @@ ${JSON.stringify(report, null, 2)}`;
       parsed = report;
     }
 
-    const translatedResult = {
+    // Merge the translation over the original, then normalize: the model can
+    // return a number where the UI expects a string, so an unchecked merge
+    // could crash the report view *after* it was already rendering fine.
+    const sourceLabValues = Array.isArray(report.labValues) ? report.labValues : [];
+    const merged = {
       ...report,
       patientInfo: parsed.patientInfo || report.patientInfo,
       shortSummary: parsed.shortSummary || report.shortSummary,
       laymanExplanation: parsed.laymanExplanation || report.laymanExplanation,
       importantFindings: parsed.importantFindings || report.importantFindings,
       safetyAlerts: parsed.safetyAlerts || report.safetyAlerts,
-      labValues: Array.isArray(parsed.labValues) && parsed.labValues.length === report.labValues.length ? parsed.labValues : report.labValues,
+      labValues:
+        Array.isArray(parsed.labValues) && parsed.labValues.length === sourceLabValues.length
+          ? parsed.labValues
+          : sourceLabValues,
       vocabulary: Array.isArray(parsed.vocabulary) ? parsed.vocabulary : report.vocabulary,
       doctorPrep: parsed.doctorPrep || report.doctorPrep,
     };
 
+    const translatedResult = {
+      ...normalizeAnalysis(merged, { fileName: report.fileName, fileType: report.fileType }),
+      // Preserve identity so the client can keep matching this report to its
+      // source copy across language switches.
+      id: report.id,
+      fileType: report.fileType,
+      timestamp: report.timestamp ?? Date.now(),
+    };
+
     res.json({ success: true, result: translatedResult });
   } catch (err: any) {
-    console.error('Error in /api/translate-report:', err);
-    res.status(500).json({ error: err.message || 'Translation failed.' });
+    logEndpointError('/api/translate-report', err);
+    const { status, message } = describeUploadError(err);
+    res.status(status).json({ error: message || 'Translation failed.' });
   }
+});
+
+// Unknown API routes must answer with JSON. Without this they fall through to
+// the SPA handler and return `index.html`, so a typo'd or renamed endpoint
+// surfaced in the browser as "Unexpected token <" instead of a clear 404.
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: `Unknown API endpoint: ${req.method} ${req.originalUrl}` });
+});
+
+// Final safety net: an unhandled error must not return an HTML stack trace to
+// a client that is about to call `response.json()` on it.
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled API error:', err);
+  if (res.headersSent) return;
+  const { status, message } = describeUploadError(err);
+  res.status(status).json({ error: message });
 });
 
 export default app;

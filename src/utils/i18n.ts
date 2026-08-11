@@ -166,6 +166,7 @@ export interface Translations {
   nonDiagnosticBadge: string;
   footerText: string;
   viewingLabel: string;
+  translatingReport: string;
   poweredByGemini: string;
   ocrVisionBadge: string;
   chatErrorPrefix: string;
@@ -394,6 +395,7 @@ export const translations: Record<Language, Translations> = {
     nonDiagnosticBadge: 'Non-Diagnostic AI',
     footerText: 'MediExplain © 2026. Educational Medical Report Assistant.',
     viewingLabel: 'Viewing:',
+    translatingReport: 'Translating your report…',
     poweredByGemini: 'Powered by Gemini 3.6 Flash & Vision',
     ocrVisionBadge: 'OCR & Vision',
     chatErrorPrefix: 'I encountered an issue processing your request:',
@@ -620,6 +622,7 @@ export const translations: Record<Language, Translations> = {
     nonDiagnosticBadge: 'IA Non Diagnostique',
     footerText: 'MediExplain © 2026. Assistant éducatif de rapports médicaux.',
     viewingLabel: 'Affichage :',
+    translatingReport: 'Traduction de votre rapport…',
     poweredByGemini: 'Propulsé par Gemini 3.6 Flash & Vision',
     ocrVisionBadge: 'OCR & Vision',
     chatErrorPrefix: 'J\'ai rencontré un problème lors du traitement de votre demande :',
@@ -846,6 +849,7 @@ export const translations: Record<Language, Translations> = {
     nonDiagnosticBadge: 'ذكاء اصطناعي غير تشخيصي',
     footerText: 'MediExplain © 2026. مساعد تعليمي للتقارير الطبية.',
     viewingLabel: 'المعروض:',
+    translatingReport: 'جارٍ ترجمة تقريرك…',
     poweredByGemini: 'مدعوم بـ Gemini 3.6 Flash والرؤية الحاسوبية',
     ocrVisionBadge: 'التعرف الضوئي والرؤية',
     chatErrorPrefix: 'واجهت مشكلة أثناء معالجة طلبك:',
