@@ -167,15 +167,19 @@ function normalizeInlineUpload(fileData: string, declaredMimeType?: string) {
 function describeUploadError(err: any): { status: number; message: string } {
   const raw = String(err?.message || err || '');
 
+  // NOTE: configuration failures deliberately use 500, not 503. The client
+  // retries 502/503/504 as transient, and re-uploading a multi-megabyte report
+  // two more times cannot fix a missing or invalid key - it just triples the
+  // payload and the latency before the user sees the real message.
   if (raw.includes('GEMINI_API_KEY')) {
     return {
-      status: 503,
+      status: 500,
       message:
-        'The AI service is not configured on the server (missing GEMINI_API_KEY). Please add your API key to the .env file and restart the server.',
+        'The AI service is not configured on the server (missing GEMINI_API_KEY). Add the key in your hosting provider\'s environment variables (or .env for local development) and redeploy.',
     };
   }
   if (raw.includes('API key not valid') || raw.includes('API_KEY_INVALID') || raw.includes('PERMISSION_DENIED')) {
-    return { status: 503, message: 'The configured AI API key is invalid or lacks permission. Please check GEMINI_API_KEY.' };
+    return { status: 500, message: 'The configured AI API key is invalid or lacks permission. Please check GEMINI_API_KEY.' };
   }
   if (raw.includes('429') || raw.includes('RESOURCE_EXHAUSTED') || raw.includes('quota')) {
     return { status: 429, message: 'The AI service is rate-limited right now. Please wait a moment and try again.' };

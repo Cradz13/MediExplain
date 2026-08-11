@@ -61,12 +61,53 @@ async function extractError(response: Response, fallback: string): Promise<strin
   return `${fallback} (HTTP ${response.status})`;
 }
 
+/**
+ * De-duplicates concurrent analyses of the same report.
+ *
+ * React 18 StrictMode double-invokes effects in development, and users
+ * double-click "Analyze" or re-drop the same file. Each of those would be a
+ * separate multi-megabyte upload and a separate (billed) Gemini call for an
+ * identical result, so identical in-flight requests share one promise.
+ */
+const inFlightAnalyses = new Map<string, Promise<ReportAnalysisResult>>();
+
 export async function analyzeReportFile(
   fileData: string,
   mimeType: string,
   fileName: string,
   fileType: 'pdf' | 'image' | 'camera_capture',
   language: string = 'en'
+): Promise<ReportAnalysisResult> {
+  // Key on content length + a cheap prefix/suffix sample rather than the whole
+  // base64 string, so we don't hash several megabytes on every upload.
+  const key = [
+    language,
+    mimeType,
+    fileType,
+    fileData.length,
+    fileData.slice(0, 64),
+    fileData.slice(-64),
+  ].join('|');
+
+  const existing = inFlightAnalyses.get(key);
+  if (existing) return existing;
+
+  const request = performAnalyzeReport(fileData, mimeType, fileName, fileType, language).finally(
+    () => {
+      inFlightAnalyses.delete(key);
+    }
+  );
+
+  inFlightAnalyses.set(key, request);
+  return request;
+}
+
+async function performAnalyzeReport(
+  fileData: string,
+  mimeType: string,
+  fileName: string,
+  fileType: 'pdf' | 'image' | 'camera_capture',
+  language: string
 ): Promise<ReportAnalysisResult> {
   const response = await fetchWithRetry('/api/analyze-report', {
     method: 'POST',
