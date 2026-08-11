@@ -99,6 +99,8 @@ export default function App() {
         setErrorMessage(t.errorUnsupportedType);
       } else if (code === 'tooLarge') {
         setErrorMessage(t.errorFileTooLarge);
+      } else if (code === 'pdfTooLarge') {
+        setErrorMessage(t.errorPdfTooLarge);
       } else if (code === 'empty') {
         setErrorMessage(t.errorEmptyFile);
       } else if (typeof code === 'string' && code.toLowerCase().includes('filereader')) {

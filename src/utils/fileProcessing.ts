@@ -15,11 +15,25 @@
 /** Maximum accepted source file size (before any downscaling). */
 export const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 
-/** Largest edge (px) we send to the model. Bigger adds latency without accuracy. */
-const MAX_IMAGE_EDGE = 2200;
+/**
+ * Maximum size of the encoded request body we are willing to send.
+ *
+ * Serverless hosts cap the request body well below our 20 MB source limit —
+ * Vercel rejects anything over 4.5 MB with `413: FUNCTION_PAYLOAD_TOO_LARGE`
+ * *before* the request reaches our Express handler, so we would never get the
+ * chance to return a friendly JSON error. Base64 also inflates bytes by ~33%.
+ * We therefore budget 3.8 MB of base64 payload and shrink images to fit.
+ */
+export const MAX_TRANSPORT_BYTES = Math.floor(3.8 * 1024 * 1024);
 
-/** JPEG quality used when re-encoding photos. */
-const JPEG_QUALITY = 0.88;
+/** Progressive fallbacks applied (in order) when a photo busts the budget. */
+const COMPRESSION_STEPS: ReadonlyArray<{ edge: number; quality: number }> = [
+  { edge: 2200, quality: 0.88 },
+  { edge: 2000, quality: 0.82 },
+  { edge: 1700, quality: 0.75 },
+  { edge: 1400, quality: 0.68 },
+  { edge: 1100, quality: 0.6 },
+];
 
 /** Image MIME types Gemini accepts inline. */
 const GEMINI_IMAGE_MIME_TYPES = [
@@ -181,7 +195,12 @@ async function optimizeImage(
 
   // Small file already in a supported format: send as-is, no quality loss.
   if (!needsConversion && !isLarge) {
-    return { dataUrl: await readAsDataURL(file), mimeType, wasOptimized: false };
+    const dataUrl = await readAsDataURL(file);
+    if (encodedSize(dataUrl) <= MAX_TRANSPORT_BYTES) {
+      return { dataUrl, mimeType, wasOptimized: false };
+    }
+    // Otherwise fall through and compress: the raw bytes would be rejected by
+    // the host's request-body limit before our server ever sees them.
   }
 
   try {
@@ -193,37 +212,71 @@ async function optimizeImage(
       throw new Error('Decoded image had no dimensions.');
     }
 
-    const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(sourceWidth, sourceHeight));
-    const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
-    const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+    let best = '';
 
-    const canvas = document.createElement('canvas');
-    canvas.width = targetWidth;
-    canvas.height = targetHeight;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas 2D context unavailable.');
-
-    // White backdrop so transparent PNGs don't become black rectangles in JPEG.
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, targetWidth, targetHeight);
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(bitmap as CanvasImageSource, 0, 0, targetWidth, targetHeight);
+    // Re-encode at progressively smaller sizes until the payload fits the
+    // transport budget. The first pass is the normal high-quality path, so
+    // ordinary photos still take exactly one encode.
+    for (const step of COMPRESSION_STEPS) {
+      const dataUrl = renderToJpeg(bitmap, sourceWidth, sourceHeight, step.edge, step.quality);
+      if (!dataUrl || dataUrl === 'data:,') {
+        throw new Error('Canvas produced an empty image.');
+      }
+      best = dataUrl;
+      if (encodedSize(dataUrl) <= MAX_TRANSPORT_BYTES) break;
+    }
 
     if ('close' in bitmap && typeof bitmap.close === 'function') {
       bitmap.close();
     }
 
-    const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY);
-    if (!dataUrl || dataUrl === 'data:,') {
-      throw new Error('Canvas produced an empty image.');
-    }
+    if (!best) throw new Error('Canvas produced an empty image.');
 
-    return { dataUrl, mimeType: 'image/jpeg', wasOptimized: true };
+    return {
+      dataUrl: best,
+      mimeType: 'image/jpeg',
+      wasOptimized: true,
+    };
   } catch (err) {
     console.warn('Image optimization failed, sending original bytes.', err);
     return { dataUrl: await readAsDataURL(file), mimeType, wasOptimized: false };
   }
+}
+
+/** Approximate decoded byte length of a base64 data URL. */
+function encodedSize(dataUrl: string): number {
+  const comma = dataUrl.indexOf(',');
+  const base64 = comma === -1 ? dataUrl : dataUrl.slice(comma + 1);
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+  return Math.floor((base64.length * 3) / 4) - padding;
+}
+
+/** Draws a decoded bitmap onto a canvas capped at `maxEdge` and returns a JPEG data URL. */
+function renderToJpeg(
+  bitmap: ImageBitmap | HTMLImageElement,
+  sourceWidth: number,
+  sourceHeight: number,
+  maxEdge: number,
+  quality: number
+): string {
+  const scale = Math.min(1, maxEdge / Math.max(sourceWidth, sourceHeight));
+  const targetWidth = Math.max(1, Math.round(sourceWidth * scale));
+  const targetHeight = Math.max(1, Math.round(sourceHeight * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas 2D context unavailable.');
+
+  // White backdrop so transparent PNGs don't become black rectangles in JPEG.
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, targetWidth, targetHeight);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap as CanvasImageSource, 0, 0, targetWidth, targetHeight);
+
+  return canvas.toDataURL('image/jpeg', quality);
 }
 
 /**
@@ -245,8 +298,17 @@ export async function prepareFileForUpload(
 
   if (kind === 'pdf') {
     onProgress?.('reading');
+    const dataUrl = await readAsDataURL(file);
+
+    // PDFs can't be re-compressed in the browser, so an oversized one has to be
+    // rejected here with a clear message rather than being sent and killed by
+    // the host's request-body limit (which returns an opaque HTML 413).
+    if (encodedSize(dataUrl) > MAX_TRANSPORT_BYTES) {
+      throw new Error('pdfTooLarge');
+    }
+
     return {
-      dataUrl: await readAsDataURL(file),
+      dataUrl,
       mimeType: 'application/pdf',
       kind: 'pdf',
       fileName: file.name,

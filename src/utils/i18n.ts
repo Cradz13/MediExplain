@@ -59,6 +59,7 @@ export interface Translations {
   stepAnalyzing: string;
   errorUnsupportedType: string;
   errorFileTooLarge: string;
+  errorPdfTooLarge: string;
   errorEmptyFile: string;
   errorReadFailed: string;
   errorAnalyzeFailed: string;
@@ -196,6 +197,7 @@ export const translations: Record<Language, Translations> = {
     stepAnalyzing: 'Gemini is analyzing medical tables & terminology...',
     errorUnsupportedType: 'Unsupported file type. Please upload a PDF or an image (JPG, PNG, WEBP, HEIC).',
     errorFileTooLarge: 'This file is too large. Please upload a file under 20 MB.',
+    errorPdfTooLarge: 'This PDF is too large to analyze (limit around 4 MB). Please upload a smaller PDF, or take a photo of the pages you want explained.',
     errorEmptyFile: 'This file appears to be empty. Please choose another file.',
     errorReadFailed: 'Failed to read the selected file. Please try again with another file.',
     errorAnalyzeFailed: 'Failed to analyze the medical report. Please try again.',
@@ -324,6 +326,7 @@ export const translations: Record<Language, Translations> = {
     stepAnalyzing: 'Gemini analyse les tableaux et la terminologie médicale...',
     errorUnsupportedType: 'Type de fichier non pris en charge. Veuillez téléverser un PDF ou une image (JPG, PNG, WEBP, HEIC).',
     errorFileTooLarge: 'Ce fichier est trop volumineux. Veuillez téléverser un fichier de moins de 20 Mo.',
+    errorPdfTooLarge: "Ce PDF est trop volumineux pour être analysé (limite d'environ 4 Mo). Veuillez téléverser un PDF plus petit, ou prendre une photo des pages à expliquer.",
     errorEmptyFile: 'Ce fichier semble vide. Veuillez choisir un autre fichier.',
     errorReadFailed: 'Impossible de lire le fichier sélectionné. Veuillez réessayer avec un autre fichier.',
     errorAnalyzeFailed: 'Échec de l\'analyse du rapport médical. Veuillez réessayer.',
@@ -452,6 +455,7 @@ export const translations: Record<Language, Translations> = {
     stepAnalyzing: 'يقوم Gemini بتحليل الجداول والمصطلحات الطبية...',
     errorUnsupportedType: 'نوع الملف غير مدعوم. يرجى تحميل ملف PDF أو صورة (JPG، PNG، WEBP، HEIC).',
     errorFileTooLarge: 'حجم الملف كبير جداً. يرجى تحميل ملف أقل من 20 ميغابايت.',
+    errorPdfTooLarge: 'ملف PDF هذا كبير جداً للتحليل (الحد الأقصى حوالي 4 ميغابايت). يرجى تحميل ملف أصغر، أو التقاط صورة للصفحات المطلوب شرحها.',
     errorEmptyFile: 'يبدو أن هذا الملف فارغ. يرجى اختيار ملف آخر.',
     errorReadFailed: 'تعذر قراءة الملف المحدد. يرجى المحاولة مرة أخرى بملف آخر.',
     errorAnalyzeFailed: 'فشل تحليل التقرير الطبي. يرجى المحاولة مرة أخرى.',
