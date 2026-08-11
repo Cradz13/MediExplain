@@ -5,14 +5,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  MessageSquare, 
   Send, 
   Sparkles, 
   Volume2, 
   VolumeX, 
   Bot, 
   User, 
-  HelpCircle, 
   ShieldAlert, 
   Loader2 
 } from 'lucide-react';
@@ -139,22 +137,24 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
   };
 
   return (
-    <div className="space-y-4 max-w-4xl mx-auto animate-in fade-in duration-200">
+    <div className="space-y-4 max-w-4xl mx-auto animate-fade-up">
       
       {/* Educational Safety Banner */}
-      <div className="bg-slate-100 dark:bg-white/[0.03] rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-white/10 flex items-center gap-3.5 text-xs text-slate-600 dark:text-gray-300 backdrop-blur-md">
-        <ShieldAlert className="w-5 h-5 text-blue-500 shrink-0" />
-        <span>
+      <div className="glass rounded-[1.5rem] p-4 sm:p-5 flex items-center gap-3.5 text-xs text-slate-600 dark:text-slate-300">
+        <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 shrink-0">
+          <ShieldAlert className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+        </div>
+        <span className="leading-relaxed">
           <strong className="font-semibold text-slate-900 dark:text-white">{t.chatSafetyBannerTitle}: </strong>
           {t.chatSafetyBannerText}
         </span>
       </div>
 
       {/* Main Chat Box Container */}
-      <div className="bg-white dark:bg-white/[0.03] rounded-3xl border border-slate-200 dark:border-white/10 shadow-xl overflow-hidden flex flex-col h-[550px]">
+      <div className="card-elevated rounded-[1.75rem] overflow-hidden flex flex-col h-[560px]">
         
         {/* Chat Messages Area */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-gradient-to-b from-transparent to-slate-50/40 dark:to-white/[0.015]">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -166,8 +166,8 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
               <div
                 className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 ${
                   msg.sender === 'user'
-                    ? 'bg-blue-600 text-white glow-blue shadow-[0_0_15px_rgba(37,99,235,0.4)]'
-                    : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                    ? 'bg-gradient-to-br from-cyan-500 to-teal-600 text-white shadow-[0_8px_20px_-6px_rgba(6,182,212,0.55)]'
+                    : 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25'
                 }`}
               >
                 {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -177,8 +177,8 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
               <div
                 className={`max-w-[80%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed space-y-2 ${
                   msg.sender === 'user'
-                    ? 'bg-blue-600 text-white rounded-tr-none glow-blue'
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-tl-none border border-slate-200/80 dark:border-white/10'
+                    ? 'bg-gradient-to-br from-cyan-500 to-teal-600 text-white rounded-tr-sm shadow-[0_8px_24px_-8px_rgba(6,182,212,0.45)]'
+                    : 'bg-white dark:bg-white/5 text-slate-900 dark:text-white rounded-tl-sm border border-slate-200/80 dark:border-white/10 shadow-sm'
                 }`}
               >
                 <p className="whitespace-pre-line">{msg.text}</p>
@@ -188,7 +188,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
                   <button
                     type="button"
                     onClick={() => speakMessage(msg.id, msg.text)}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline pt-1"
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:underline pt-1"
                   >
                     {speakingMsgId === msg.id ? (
                       <>
@@ -207,10 +207,10 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
 
           {isSending && (
             <div className="flex items-center gap-3 text-slate-500 text-xs py-2">
-              <div className="w-9 h-9 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+              <div className="w-9 h-9 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+                <Loader2 className="w-4 h-4 animate-spin text-cyan-500" />
               </div>
-              <span className="text-slate-600 dark:text-gray-400">{t.aiAnalyzingQuery}</span>
+              <span className="text-slate-600 dark:text-slate-400">{t.aiAnalyzingQuery}</span>
             </div>
           )}
 
@@ -218,9 +218,9 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
         </div>
 
         {/* Quick Prompts Bar */}
-        <div className="px-4 py-2.5 border-t border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-gray-500 shrink-0 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-blue-500" /> {t.suggestedPrompts}
+        <div className="px-4 py-2.5 border-t border-slate-100 dark:border-white/8 bg-slate-50/80 dark:bg-white/[0.03] flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 shrink-0 flex items-center gap-1">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-500" /> {t.suggestedPrompts}
           </span>
           {QUICK_PROMPTS.map((prompt, idx) => (
             <button
@@ -228,7 +228,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
               type="button"
               disabled={isSending}
               onClick={() => handleSendMessage(prompt)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-white/5 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 hover:border-cyan-500/40 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {prompt}
             </button>
@@ -241,7 +241,7 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
             e.preventDefault();
             handleSendMessage();
           }}
-          className="p-4 bg-white dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/10 flex items-center gap-3"
+          className="p-4 bg-white/60 dark:bg-white/[0.02] border-t border-slate-200/80 dark:border-white/8 flex items-center gap-3"
         >
           <input
             type="text"
@@ -249,13 +249,13 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
             onChange={(e) => setInputMessage(e.target.value)}
             disabled={isSending}
             placeholder={t.askAnythingPlaceholder}
-            className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full px-5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+            className="flex-1 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full px-5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-shadow"
           />
 
           <button
             type="submit"
             disabled={!inputMessage.trim() || isSending}
-            className="p-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all glow-blue disabled:opacity-50 shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+            className="p-3 rounded-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
           </button>

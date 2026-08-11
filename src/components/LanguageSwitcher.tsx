@@ -32,10 +32,10 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
   return (
     <label
-      className="relative flex items-center gap-1.5 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border border-slate-200 dark:border-white/10"
+      className="relative flex items-center gap-1.5 rounded-full text-xs font-semibold btn-secondary"
       title={t.selectLanguageLabel}
     >
-      <Globe className="absolute start-3 w-4 h-4 text-blue-600 dark:text-blue-400 pointer-events-none z-10" />
+      <Globe className="absolute start-3 w-4 h-4 text-cyan-600 dark:text-cyan-400 pointer-events-none z-10" />
       <span className="absolute start-8 text-sm leading-none pointer-events-none z-10" aria-hidden="true">
         {selectedLanguage.flag}
       </span>
@@ -44,7 +44,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         value={currentLanguage}
         onChange={(event) => onLanguageChange(event.target.value as Language)}
         aria-label={t.selectLanguageLabel}
-        className="appearance-none cursor-pointer bg-transparent text-slate-700 dark:text-slate-200 py-2 ps-[3.45rem] pe-8 outline-none rounded-full focus-visible:ring-2 focus-visible:ring-blue-500 min-w-[6.7rem] sm:min-w-[8.6rem]"
+        className="appearance-none cursor-pointer bg-transparent text-slate-700 dark:text-slate-200 py-2 ps-[3.45rem] pe-8 outline-none rounded-full focus-visible:ring-2 focus-visible:ring-cyan-500 min-w-[6.7rem] sm:min-w-[8.6rem]"
       >
         {LANGUAGES.map((language) => (
           <option key={language.code} value={language.code} className="bg-white text-slate-900">
