@@ -1,13 +1,24 @@
 # Brand assets
 
-Drop your logo here as **`logo.png`** (square PNG, transparent background, ideally 512×512).
+| File | Size | Used for |
+| --- | --- | --- |
+| `logo.png` | 512×512 | App header brand mark, printed report header, large favicon |
+| `logo-192.png` | 192×192 | Apple touch icon, Android home-screen icon |
+| `favicon-64.png` | 64×64 | Browser tab favicon |
 
-It is used automatically in three places, with no code changes needed:
+The logo is the MediExplain mark: a dark navy squircle containing a blue rounded
+square with a white stethoscope.
 
-| Where | File |
-| --- | --- |
-| Browser tab icon / apple-touch-icon | `index.html` (`<link rel="icon" href="/logo.png">`) |
-| App header brand mark | `src/components/BrandLogo.tsx` (used by `Header.tsx`) |
-| Printed / saved report header | `src/components/PrintableReportView.tsx` |
+## Where it is wired up
 
-If `logo.png` is missing, the app falls back to the built-in stethoscope badge.
+- `index.html` — `<link rel="icon">` / `<link rel="apple-touch-icon">`
+- `src/components/BrandLogo.tsx` — shared component (used by `Header.tsx`)
+- `src/components/PrintableReportView.tsx` — print/PDF header
+
+If `logo.png` is ever missing, `BrandLogo` falls back to the built-in
+stethoscope badge so the header never breaks.
+
+## Replacing the logo
+
+Overwrite the three PNGs above, keeping the same file names and dimensions.
+No code changes are required.
