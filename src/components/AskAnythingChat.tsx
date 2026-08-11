@@ -29,16 +29,16 @@ interface AskAnythingChatProps {
 export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext, language = 'en' }) => {
   const t = translations[language];
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome-msg',
-      sender: 'ai',
-      text: reportContext
-        ? `${t.askAnythingHeader} (${reportContext.fileName}).`
-        : t.askAnythingHeader,
-      timestamp: Date.now(),
-    },
-  ]);
+  const createWelcomeMessage = (): ChatMessage => ({
+    id: `welcome-${language}-${reportContext?.id ?? 'no-report'}`,
+    sender: 'ai',
+    text: reportContext
+      ? `${t.askAnythingHeader} (${reportContext.fileName}).`
+      : t.askAnythingHeader,
+    timestamp: Date.now(),
+  });
+
+  const [messages, setMessages] = useState<ChatMessage[]>(createWelcomeMessage);
 
   const [inputMessage, setInputMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -65,6 +65,16 @@ export const AskAnythingChat: React.FC<AskAnythingChatProps> = ({ reportContext,
         'What should I ask my doctor during my visit?',
         'Can you explain my lab values in simple terms?',
       ];
+
+  // A conversation belongs to the selected language and report. Reset it when
+  // either changes so the welcome text, future answers, and read-aloud voice
+  // never stay in the language from the previous page.
+  useEffect(() => {
+    cancelSpeech();
+    setSpeakingMsgId(null);
+    setMessages([createWelcomeMessage()]);
+    setInputMessage('');
+  }, [language, reportContext?.id]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -168,21 +168,39 @@ export const cancelSpeech = (): void => {
 };
 
 /**
- * Speaks `text` in the given app language using the best matching voice.
- * Any in-flight utterance is cancelled first.
+ * Produces speech-friendly text. The chat can contain markdown, bullets,
+ * emojis, URLs, and medical values. Removing symbols before creating an
+ * utterance prevents screen voices from saying things such as “asterisk”,
+ * “slash”, or “open parenthesis”. Digits and letters are retained.
+ */
+export const textForSpeech = (text: string): string =>
+  text
+    // Keep the visible chat message unchanged; clean only the spoken copy.
+    .replace(/https?:\/\/\S+/giu, ' ')
+    // Remove all Unicode punctuation and symbols, while preserving letters,
+    // numbers, whitespace, and combining marks used by Arabic and French.
+    .replace(/[\p{P}\p{S}]/gu, ' ')
+    .replace(/\s+/gu, ' ')
+    .trim();
+
+/**
+ * Speaks words and numbers from `text` in the given app language using the
+ * best matching voice. Punctuation and symbols are never sent to the speech
+ * engine. Any in-flight utterance is cancelled first.
  */
 export const speak = (
   text: string,
   lang: Language | string,
   options: SpeakOptions = {}
 ): SpeechSynthesisUtterance | null => {
-  if (!isSupported() || !text || !text.trim()) return null;
+  const spokenText = textForSpeech(text);
+  if (!isSupported() || !spokenText) return null;
 
   const language = toLanguage(lang);
 
   window.speechSynthesis.cancel();
 
-  const utterance = new SpeechSynthesisUtterance(text);
+  const utterance = new SpeechSynthesisUtterance(spokenText);
   utterance.lang = SPEECH_LOCALES[language];
 
   const voice = getBestVoice(language);
