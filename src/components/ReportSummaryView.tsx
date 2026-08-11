@@ -23,6 +23,7 @@ import {
 import { ReportAnalysisResult } from '../types';
 import { Language, translations } from '../utils/i18n';
 import { speak, cancelSpeech, isSpeechSupported } from '../utils/speech';
+import { toArray } from '../utils/format';
 
 interface ReportSummaryViewProps {
   analysis: ReportAnalysisResult;
@@ -38,6 +39,14 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [copied, setCopied] = useState(false);
   const t = translations[language];
+
+  // Model responses can omit whole sections, so every list is normalized before
+  // it is counted or mapped over.
+  const labValues = toArray(analysis.labValues);
+  const vocabulary = toArray(analysis.vocabulary);
+  const importantFindings = toArray(analysis.importantFindings);
+  const safetyAlerts = toArray(analysis.safetyAlerts);
+  const topQuestions = toArray(analysis.doctorPrep?.topQuestions);
 
   // Audio Speech Narration for layman summary
   const toggleAudioNarration = () => {
@@ -59,7 +68,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
   };
 
   const copySummaryToClipboard = () => {
-    const text = `MediExplain - ${analysis.fileName}\n\n${analysis.shortSummary}\n\n${t.plainLanguageExplanation}\n${analysis.laymanExplanation}\n\n${t.importantFindingsTitle}\n${analysis.importantFindings.map((f) => `- ${f}`).join('\n')}`;
+    const text = `MediExplain - ${analysis.fileName}\n\n${analysis.shortSummary}\n\n${t.plainLanguageExplanation}\n${analysis.laymanExplanation}\n\n${t.importantFindingsTitle}\n${importantFindings.map((f) => `- ${f}`).join('\n')}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -99,7 +108,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               )}
               <span className="flex items-center gap-1.5">
                 <Activity className="w-3.5 h-3.5 text-blue-500" />
-                {analysis.labValues.length} {t.labTestsIdentified}
+                {labValues.length} {t.labTestsIdentified}
               </span>
             </div>
           </div>
@@ -172,7 +181,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.labValuesLabel} ({analysis.labValues.length})</span>
+                <span>{t.labValuesLabel} ({labValues.length})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
@@ -186,7 +195,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.medicalTermsLabel} ({analysis.vocabulary.length})</span>
+                <span>{t.medicalTermsLabel} ({vocabulary.length})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
@@ -200,7 +209,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
               className="bg-white dark:bg-white/5 p-5 rounded-2xl border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-white/10 transition-all text-left space-y-2 group"
             >
               <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center justify-between">
-                <span>{t.doctorQuestionsLabel} ({analysis.doctorPrep?.topQuestions?.length || 5})</span>
+                <span>{t.doctorQuestionsLabel} ({topQuestions.length})</span>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </div>
               <p className="text-[11px] text-slate-500 dark:text-gray-400">
@@ -238,7 +247,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             </h3>
 
             <ul className="space-y-3">
-              {analysis.importantFindings.map((finding, idx) => (
+              {importantFindings.map((finding, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-xs text-slate-700 dark:text-gray-300 leading-relaxed">
                   <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0 mt-1.5 glow-blue"></span>
                   <span>{finding}</span>
@@ -255,7 +264,7 @@ export const ReportSummaryView: React.FC<ReportSummaryViewProps> = ({
             </h3>
 
             <ul className="space-y-2 text-xs leading-relaxed dark:text-gray-300">
-              {analysis.safetyAlerts.map((alert, idx) => (
+              {safetyAlerts.map((alert, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span>&bull;</span>
                   <span>{alert}</span>

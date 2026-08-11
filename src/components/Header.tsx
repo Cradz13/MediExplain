@@ -16,7 +16,9 @@ import {
   ClipboardList,
   Activity,
   GitCompare,
-  ArrowLeft
+  ArrowLeft,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { getSampleReports, SampleReport } from '../data/sampleReports';
 import { BrandLogo } from './BrandLogo';
@@ -87,6 +89,21 @@ export const Header: React.FC<HeaderProps> = ({
             
             {/* Language Switcher Button */}
             <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
+
+            {/* Light / Dark Theme Toggle */}
+            <button
+              type="button"
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2.5 rounded-full text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 transition-colors border border-slate-200 dark:border-white/10"
+              title={darkMode ? t.lightMode : t.darkMode}
+              aria-label={darkMode ? t.lightMode : t.darkMode}
+            >
+              {darkMode ? (
+                <Sun className="w-4 h-4 text-amber-500" />
+              ) : (
+                <Moon className="w-4 h-4 text-blue-600" />
+              )}
+            </button>
 
             {/* Sample Reports Selector */}
             <div className="relative">

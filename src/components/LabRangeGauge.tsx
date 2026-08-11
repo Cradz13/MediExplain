@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { Language, translations } from '../utils/i18n';
+import { toText } from '../utils/format';
 
 interface LabRangeGaugeProps {
   valueStr: string;
@@ -24,8 +25,17 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
   language = 'en',
 }) => {
   const t = translations[language];
+
+  // The analysis is model-generated, so a lab result can arrive as a number
+  // (`238`) rather than a string (`"238"`), and the reference range can be
+  // missing entirely. Coerce both before any string work: calling `.replace()`
+  // on a number used to crash the whole Lab Values tab.
+  const safeValue = toText(valueStr);
+  const safeRange = toText(referenceRangeStr);
+  const safeUnit = toText(unit);
+
   // Parse numerical value
-  const numVal = parseFloat(valueStr.replace(/[^0-9.]/g, ''));
+  const numVal = parseFloat(safeValue.replace(/[^0-9.]/g, ''));
   if (isNaN(numVal)) return null;
 
   // Parse reference range
@@ -34,7 +44,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
   let isLessThanType = false;
   let isGreaterThanType = false;
 
-  const rangeClean = referenceRangeStr.trim();
+  const rangeClean = safeRange.trim();
   if (rangeClean.includes('-')) {
     const parts = rangeClean.split('-').map((p) => parseFloat(p.replace(/[^0-9.]/g, '')));
     if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
@@ -96,7 +106,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
         </div>
         <div className="flex justify-between text-[10px] text-slate-400 dark:text-gray-500 font-mono">
           <span>{t.lowLabel}</span>
-          <span>{t.normalLabel} ({referenceRangeStr})</span>
+          <span>{t.normalLabel} ({safeRange})</span>
           <span>{t.highLabel}</span>
         </div>
       </div>
@@ -108,7 +118,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
       <div className="flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-gray-300">
         <span>{t.referenceSpectrum}</span>
         <span className="font-mono text-[11px] text-slate-500 dark:text-gray-400">
-          {t.rangeLabel} <strong className="text-slate-900 dark:text-white">{referenceRangeStr} {unit}</strong>
+          {t.rangeLabel} <strong className="text-slate-900 dark:text-white">{safeRange} {safeUnit}</strong>
         </span>
       </div>
 
@@ -130,7 +140,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
         <div
           className={`absolute top-0 bottom-0 w-3 rounded-full -ml-1.5 border-2 transition-all ${getPinColor()}`}
           style={{ left: `${percent}%` }}
-          title={`${t.measuredValueLabel} ${numVal} ${unit}`}
+          title={`${t.measuredValueLabel} ${numVal} ${safeUnit}`}
         />
       </div>
 
@@ -138,7 +148,7 @@ export const LabRangeGauge: React.FC<LabRangeGaugeProps> = ({
         <span>0</span>
         <span className="font-sans font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-blue-500 inline-block animate-pulse" />
-          {t.yourValueLabel} <strong className="text-slate-900 dark:text-white">{valueStr} {unit}</strong>
+          {t.yourValueLabel} <strong className="text-slate-900 dark:text-white">{safeValue} {safeUnit}</strong>
         </span>
         <span>{t.highLabel} +</span>
       </div>

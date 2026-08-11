@@ -17,7 +17,7 @@ import { PrintableReportView } from './components/PrintableReportView';
 import { ReportComparisonView } from './components/ReportComparisonView';
 import { ReportAnalysisResult } from './types';
 import { getSampleReports, getSampleReportById, SampleReport } from './data/sampleReports';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { analyzeReportFile, translateReportResult } from './services/api';
 import { prepareFileForUpload } from './utils/fileProcessing';
 import { Language, translations } from './utils/i18n';
@@ -27,9 +27,21 @@ export default function App() {
   // This means switching from English to French, then Arabic, always translates
   // from the original report instead of translating an already-translated copy.
   const [sourceAnalysis, setSourceAnalysis] = useState<ReportAnalysisResult | null>(null);
+  // Language the source analysis was actually produced in. The report is
+  // already written in the language selected at upload time, so re-translating
+  // it into that same language is a wasted (billed) round-trip that can only
+  // degrade the original wording.
+  const [sourceLanguage, setSourceLanguage] = useState<Language>('en');
   const [analysis, setAnalysis] = useState<ReportAnalysisResult | null>(null);
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('summary');
-  const [darkMode, setDarkMode] = useState<boolean>(true);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('medi_explain_theme');
+    if (saved === 'light') return false;
+    if (saved === 'dark') return true;
+    // No stored choice yet: follow the operating system preference.
+    return !window.matchMedia?.('(prefers-color-scheme: light)').matches;
+  });
   const [showLiveCamera, setShowLiveCamera] = useState<boolean>(false);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [analyzingStep, setAnalyzingStep] = useState<string>('');
@@ -41,11 +53,18 @@ export default function App() {
 
   const t = translations[language];
 
+  // The whole UI is styled with Tailwind `dark:` variants, which key off this
+  // class. It used to be added unconditionally, so the light theme (and the
+  // toggle that selects it) could never actually be shown.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('medi_explain_theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
   // Apply the selected language to every page, including browser accessibility
   // metadata and right-to-left layout. Reports are localized from their source
   // copy whenever the user changes language.
   useEffect(() => {
-    document.documentElement.classList.add('dark');
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('medi_explain_lang', language);
@@ -53,24 +72,42 @@ export default function App() {
     if (!sourceAnalysis) return;
 
     let cancelled = false;
+
     if (sourceAnalysis.fileType === 'sample') {
+      // Samples ship pre-translated; just swap in the localized copy.
       const sampleId = sourceAnalysis.id.replace('-analysis', '');
       const updatedSample = getSampleReportById(sampleId, language);
       if (updatedSample && !cancelled) setAnalysis(updatedSample.analysis);
-    } else {
-      translateReportResult(sourceAnalysis, language)
-        .then((translated) => {
-          if (translated && !cancelled) setAnalysis(translated);
-        })
-        .catch((err) => {
-          console.warn('Failed to translate custom report:', err);
-        });
+      return () => {
+        cancelled = true;
+      };
     }
+
+    // The analysis was generated in this language already - nothing to do.
+    if (language === sourceLanguage) {
+      setAnalysis(sourceAnalysis);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setIsTranslating(true);
+    translateReportResult(sourceAnalysis, language)
+      .then((translated) => {
+        if (translated && !cancelled) setAnalysis(translated);
+      })
+      .catch((err) => {
+        console.warn('Failed to translate custom report:', err);
+        // Keep showing the untranslated report rather than a blank screen.
+      })
+      .finally(() => {
+        if (!cancelled) setIsTranslating(false);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [language, sourceAnalysis]);
+  }, [language, sourceAnalysis, sourceLanguage]);
 
   // Handle local File Upload (PDF, JPG, PNG, HEIC, etc.)
   const handleFileUpload = async (file: File) => {
@@ -97,6 +134,7 @@ export default function App() {
         language
       );
 
+      setSourceLanguage(language);
       setSourceAnalysis(result);
       setAnalysis(result);
       setActiveTab('summary');
@@ -138,6 +176,7 @@ export default function App() {
         'camera_capture',
         language
       );
+      setSourceLanguage(language);
       setSourceAnalysis(result);
       setAnalysis(result);
       setActiveTab('summary');
@@ -151,6 +190,7 @@ export default function App() {
 
   // Load sample demo report
   const handleSelectSample = (sample: SampleReport) => {
+    setSourceLanguage(language);
     setSourceAnalysis(sample.analysis);
     setAnalysis(sample.analysis);
     setActiveTab('summary');
@@ -159,6 +199,7 @@ export default function App() {
 
   // Reset application
   const handleReset = () => {
+    setSourceLanguage(language);
     setSourceAnalysis(null);
     setAnalysis(null);
     setActiveTab('summary');
@@ -219,7 +260,17 @@ export default function App() {
               </button>
 
               <div className="text-xs text-slate-500 dark:text-gray-400 font-medium">
-                {t.viewingLabel} <strong className="text-slate-900 dark:text-white font-serif">{analysis.fileName}</strong>
+                {isTranslating ? (
+                  <span className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    {t.translatingReport}
+                  </span>
+                ) : (
+                  <>
+                    {t.viewingLabel}{' '}
+                    <strong className="text-slate-900 dark:text-white font-serif">{analysis.fileName}</strong>
+                  </>
+                )}
               </div>
             </div>
 

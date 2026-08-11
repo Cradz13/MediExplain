@@ -7,6 +7,7 @@ import React from 'react';
 import { ReportAnalysisResult } from '../types';
 import { Language, translations } from '../utils/i18n';
 import { BrandLogo } from './BrandLogo';
+import { toArray } from '../utils/format';
 
 interface PrintableReportViewProps {
   analysis: ReportAnalysisResult;
@@ -78,8 +79,8 @@ export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analys
             </tr>
           </thead>
           <tbody>
-            {analysis.labValues.map((v) => (
-              <tr key={v.id} className="border-b border-slate-200">
+            {toArray(analysis.labValues).map((v, idx) => (
+              <tr key={v.id || `lab-${idx}`} className="border-b border-slate-200">
                 <td className="py-2 px-1 font-semibold">{v.name}</td>
                 <td className="py-2 px-1 font-bold">{v.value} {v.unit}</td>
                 <td className="py-2 px-1">{v.referenceRange}</td>
@@ -96,8 +97,8 @@ export const PrintableReportView: React.FC<PrintableReportViewProps> = ({ analys
           {t.printSection4}
         </h2>
         <ol className="list-decimal list-inside space-y-1.5 text-xs">
-          {(analysis.doctorPrep?.topQuestions || []).map((q) => (
-            <li key={q.id} className="font-medium">
+          {toArray(analysis.doctorPrep?.topQuestions).map((q, idx) => (
+            <li key={q.id || `q-${idx}`} className="font-medium">
               "{q.question}" <span className="text-slate-500">({q.context})</span>
             </li>
           ))}

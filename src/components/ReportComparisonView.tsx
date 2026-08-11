@@ -19,6 +19,7 @@ import {
 import { ReportAnalysisResult, LabValueItem } from '../types';
 import { getSampleReports, SampleReport } from '../data/sampleReports';
 import { Language, translations } from '../utils/i18n';
+import { toArray, toNumber, toText } from '../utils/format';
 
 interface ReportComparisonViewProps {
   currentAnalysis: ReportAnalysisResult;
@@ -55,33 +56,48 @@ export const ReportComparisonView: React.FC<ReportComparisonViewProps> = ({
 
   const comparisonAnalysis = selectedComparisonSample?.analysis;
 
-  // Compute matched lab items
-  const matchedValues = currentAnalysis.labValues.map((curr) => {
-    const prev = comparisonAnalysis?.labValues.find(
-      (p) => p.name.toLowerCase() === curr.name.toLowerCase() || p.category === curr.category
+  // Compute matched lab items.
+  //
+  // Every field here is model-generated, so names, values and units are coerced
+  // to text before any string comparison: a numeric `value` used to crash this
+  // whole tab on `.replace()`.
+  const matchedValues = toArray(currentAnalysis.labValues).map((curr) => {
+    const currName = toText(curr.name);
+
+    const prev = toArray(comparisonAnalysis?.labValues).find(
+      (p) =>
+        toText(p.name).toLowerCase() === currName.toLowerCase() ||
+        (Boolean(curr.category) && toText(p.category) === toText(curr.category))
     );
 
-    const currNum = parseFloat(curr.value.replace(/[^0-9.]/g, ''));
-    const prevNum = prev ? parseFloat(prev.value.replace(/[^0-9.]/g, '')) : NaN;
+    const currNum = toNumber(curr.value);
+    const prevNum = prev ? toNumber(prev.value) : NaN;
 
-    let delta: number | null = null;
     let deltaStr = t.notAvailableShort;
     let trend: 'improved' | 'elevated' | 'same' | 'unknown' = 'unknown';
 
     if (!isNaN(currNum) && !isNaN(prevNum)) {
-      delta = currNum - prevNum;
-      deltaStr = `${delta > 0 ? '+' : ''}${delta.toFixed(1)} ${curr.unit}`;
+      const delta = currNum - prevNum;
+      deltaStr = `${delta > 0 ? '+' : ''}${delta.toFixed(1)} ${toText(curr.unit)}`;
+
+      const lowerName = currName.toLowerCase();
 
       if (curr.status === 'normal' && prev?.status !== 'normal') {
         trend = 'improved';
       } else if (curr.status !== 'normal' && prev?.status === 'normal') {
         trend = 'elevated';
-      } else if (delta < 0 && (curr.name.toLowerCase().includes('cholesterol') || curr.name.toLowerCase().includes('ldl') || curr.name.toLowerCase().includes('triglycerides') || curr.name.toLowerCase().includes('hba1c'))) {
-        trend = 'improved'; // Lower is better for LDL / Glucose / HbA1c
-      } else if (delta > 0 && curr.name.toLowerCase().includes('hdl')) {
-        trend = 'improved'; // Higher is better for HDL
       } else if (Math.abs(delta) < 0.1) {
         trend = 'same';
+      } else if (
+        delta < 0 &&
+        (lowerName.includes('cholesterol') ||
+          lowerName.includes('ldl') ||
+          lowerName.includes('triglycerides') ||
+          lowerName.includes('hba1c'))
+      ) {
+        trend = 'improved'; // Lower is better for LDL / Glucose / HbA1c
+      } else if (delta > 0 && lowerName.includes('hdl')) {
+        trend = 'improved'; // Higher is better for HDL
       } else if (delta > 0) {
         trend = 'elevated';
       } else {
