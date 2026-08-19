@@ -130,7 +130,8 @@ function normalizeInlineUpload(fileData: string, declaredMimeType?: string) {
   if (sizeBytes < 64) {
     return { error: 'The uploaded file is too small or corrupted. Please choose another file.' };
   }
-  if (sizeBytes > 25 * 1024 * 1024) {
+  // Keep in sync with MAX_FILE_BYTES on the client (20 MB) and its message.
+  if (sizeBytes > 20 * 1024 * 1024) {
     return { error: 'The uploaded file is too large. Please upload a file under 20 MB.' };
   }
 
@@ -186,6 +187,11 @@ function describeUploadError(err: any): { status: number; message: string } {
   }
   if (raw.includes('503') || raw.includes('UNAVAILABLE') || raw.includes('Overloaded')) {
     return { status: 503, message: 'The AI service is temporarily overloaded. Please try again in a few seconds.' };
+  }
+  // Network-level failure reaching Gemini (DNS, TLS, offline): "fetch failed"
+  // is the raw undici error text and must never be shown to the user as-is.
+  if (raw.includes('fetch failed') || raw.includes('ETIMEDOUT') || raw.includes('ECONNREFUSED') || raw.includes('ECONNRESET')) {
+    return { status: 503, message: 'Could not reach the AI service. Please try again in a moment.' };
   }
   if (raw.includes('unsupported') || raw.includes('Unsupported MIME') || raw.includes('INVALID_ARGUMENT')) {
     return {
@@ -728,21 +734,37 @@ Instructions for Chat:
 - Never give a medical diagnosis, treatment plan, or drug dosage.
 - Always include a brief reminder in ${targetLangName} that this is educational information and not medical advice.`;
 
-    // Construct contents history
-    const contents: any[] = [];
-    if (Array.isArray(messages)) {
-      messages.forEach((msg) => {
-        contents.push({
-          role: msg.sender === 'user' ? 'user' : 'model',
-          parts: [{ text: msg.text }],
-        });
-      });
-    }
+    // Construct contents history.
+    //
+    // The client seeds every conversation with an AI welcome bubble, which
+    // maps to a leading `model` turn. Gemini's multi-turn format requires the
+    // FIRST turn to be `user` and roles to alternate - otherwise the request
+    // is rejected with `INVALID_ARGUMENT: First content should be with role
+    // 'user'` and Ask Anything fails on its very first question. Drop leading
+    // model turns and merge consecutive same-role turns so the payload is
+    // always well-formed regardless of what the client sends.
+    const historyTurns = (Array.isArray(messages) ? messages : [])
+      .map((msg: any) => ({
+        role: msg?.sender === 'user' ? ('user' as const) : ('model' as const),
+        text: typeof msg?.text === 'string' ? msg.text.trim() : '',
+      }))
+      .filter((turn) => turn.text !== '');
 
-    contents.push({
-      role: 'user',
-      parts: [{ text: userMessage }],
-    });
+    const turns = [...historyTurns, { role: 'user' as const, text: String(userMessage).trim() }];
+    const firstUserIndex = turns.findIndex((turn) => turn.role === 'user');
+
+    const contents: any[] = [];
+    if (firstUserIndex !== -1) {
+      for (const turn of turns.slice(firstUserIndex)) {
+        const last = contents[contents.length - 1];
+        if (last && last.role === turn.role) {
+          // Consecutive same-role turns must be merged to keep alternation.
+          last.parts.push({ text: turn.text });
+        } else {
+          contents.push({ role: turn.role, parts: [{ text: turn.text }] });
+        }
+      }
+    }
 
     const response = await generateContentWithRetry({
       ai,
@@ -799,7 +821,8 @@ app.post('/api/tts', async (req, res) => {
     }
   } catch (err: any) {
     logEndpointError('/api/tts', err);
-    res.status(500).json({ error: err.message || 'Speech generation failed.' });
+    const { status, message } = describeUploadError(err);
+    res.status(status).json({ error: message || 'Speech generation failed.' });
   }
 });
 

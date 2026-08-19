@@ -21,6 +21,7 @@ import { ArrowLeft, Loader2, FileText, Instagram, ExternalLink } from 'lucide-re
 import { analyzeReportFile, translateReportResult } from './services/api';
 import { prepareFileForUpload } from './utils/fileProcessing';
 import { Language, translations } from './utils/i18n';
+import { Analytics } from '@vercel/analytics/react';
 
 const INSTAGRAM_URL = 'https://www.instagram.com/medi.explain/';
 
@@ -349,6 +350,9 @@ export default function App() {
           </a>
         </div>
       </footer>
+
+      {/* Vercel Web Analytics (production tracking, no-op locally) */}
+      <Analytics />
 
     </div>
   );
