@@ -3,28 +3,11 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Load Vercel Analytics script in production only
-function loadVercelAnalyticsScript() {
-  if (typeof window === 'undefined') return;
-  // Avoid loading multiple times
-  if ((window as any).__vercel_analytics_loaded) return;
-  // Only load in production builds
-  if (import.meta.env.MODE !== 'production') return;
-
-  const s = document.createElement('script');
-  s.src = 'https://static.vercel-insights.com/v1/script.js';
-  s.defer = true;
-  s.setAttribute('data-auto', 'false');
-  s.onload = () => {
-    (window as any).__vercel_analytics_loaded = true;
-    console.log('Vercel Analytics script loaded');
-  };
-  s.onerror = () => console.warn('Failed to load Vercel Analytics script');
-  document.head.appendChild(s);
-}
-
-// Call the loader before the app mounts
-loadVercelAnalyticsScript();
+// Vercel Web Analytics is wired up with the official <Analytics /> component
+// inside `src/App.tsx` (from the installed `@vercel/analytics/react` package).
+// The previous hand-rolled loader injected the insights script with
+// `data-auto="false"` and never called the manual pageview API afterwards, so
+// analytics silently collected nothing at all.
 
 // Suppress benign Vite HMR WebSocket connection errors in sandboxed environment
 if (typeof window !== 'undefined') {
